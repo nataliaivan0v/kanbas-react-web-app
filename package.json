@@ -1,11 +1,10 @@
 {
   "name": "kambas-react-web-app",
-  "private": true,
   "version": "1.0.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm install && CI=false npm run dev",
+    "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -26,16 +25,15 @@
     "typescript-eslint": "^8.18.2",
     "vite": "^6.0.5"
   },
-  "description": "This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.",
-  "main": "index.js",
+  "description": "A minimal React project using Vite with HMR and ESLint rules.",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/nataliaivan0v/kanbas-react-web-app.git"
+    "url": "https://github.com/nataliaivan0v/kambas-react-web-app.git"
   },
   "author": "Natalia Ivanov",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/nataliaivan0v/kanbas-react-web-app/issues"
+    "url": "https://github.com/nataliaivan0v/kambas-react-web-app/issues"
   },
-  "homepage": "https://github.com/nataliaivan0v/kanbas-react-web-app#readme"
+  "homepage": "https://nataliaivanov-cs4550.netlify.app"
 }
