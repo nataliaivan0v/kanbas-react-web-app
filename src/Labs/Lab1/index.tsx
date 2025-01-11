@@ -58,6 +58,17 @@ export default function Lab1() {
           <li>Flip and cook the other side.</li>
           <li>Serve and enjoy!</li>
         </ol>
+        My favorite recipe (Spicy Vodka Pasta):
+        <ol id="wd-your-favorite-recipe">
+          <li>Chop 1/2 a shallot and 2 garlic cloves</li>
+          <li>Saute the shallot in olive oil then add garlic</li>
+          <li>Pour in 2 tablespoons of vodka</li>
+          <li>Cook 1 pound of pasta</li>
+          <li>Add less than one tsp of crushed red pepper, salt, 1/2 cup of tomato paste, and 1 cup of heavy cream</li>
+          <li>Save 1 cup of pasta water</li>
+          <li>Add 1/4 cup of grated parmesan, pasta water, and 1/4 cup chopped basil</li>
+          <li>Pour pasta into sauce and add 2 tbs butter</li>
+        </ol>
         <h5>Unordered List Tag</h5>
         My favorite books (in no particular order)
         <ul id="wd-my-books">
@@ -66,6 +77,13 @@ export default function Lab1() {
           <li>Ender's Game</li>
           <li>Red Mars</li>
           <li>The Forever War</li>
+        </ul>
+        Your favorite books (in no particular order)
+        <ul id="wd-your-books">
+          <li>The Inheritance Games</li>
+          <li>Normal People</li>
+          <li>The Return</li>
+          <li>The Hunger Games</li>
         </ul>
       </div>
       <div id="wd-forms">
@@ -99,6 +117,7 @@ export default function Lab1() {
         Choose your only favorite movie genre:
         <br />
         <input id="wd-comedy" type="radio" name="wd-genre" />
+        Comedy
         <br />
         <label>
           <input type="radio" name="wd-genre" checked />
@@ -122,7 +141,6 @@ export default function Lab1() {
         <input type="radio" name="wd-color" />
         Red
         <br />
-        <label htmlFor="wd-comedy">Comedy</label>
       </div>
     </div>
   );
