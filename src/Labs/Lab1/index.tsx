@@ -1,7 +1,7 @@
 export default function Lab1() {
   return (
     <div>
-      <h2>Lab 1</h2>
+      <h2>Lab 1 - Natalia Ivanov (Web Development, CS4550 02 Spring 2025)</h2>
       <h3>HTML Examples</h3>
       <div id="wd-h-tag">
         <h4>Heading Tags</h4>
@@ -64,9 +64,15 @@ export default function Lab1() {
           <li>Saute the shallot in olive oil then add garlic</li>
           <li>Pour in 2 tablespoons of vodka</li>
           <li>Cook 1 pound of pasta</li>
-          <li>Add less than one tsp of crushed red pepper, salt, 1/2 cup of tomato paste, and 1 cup of heavy cream</li>
+          <li>
+            Add less than one tsp of crushed red pepper, salt, 1/2 cup of tomato
+            paste, and 1 cup of heavy cream
+          </li>
           <li>Save 1 cup of pasta water</li>
-          <li>Add 1/4 cup of grated parmesan, pasta water, and 1/4 cup chopped basil</li>
+          <li>
+            Add 1/4 cup of grated parmesan, pasta water, and 1/4 cup chopped
+            basil
+          </li>
           <li>Pour pasta into sauce and add 2 tbs butter</li>
         </ol>
         <h5>Unordered List Tag</h5>
@@ -113,21 +119,21 @@ export default function Lab1() {
         />
       </div>
       <div>
-        <h4>Radio Buttons</h4>
-        Choose your only favorite movie genre:
+        <h4>Buttons</h4>
+        Select many favorite movie genres:
         <br />
-        <input id="wd-comedy" type="radio" name="wd-genre" />
+        <input id="wd-comedy" type="checkbox" name="wd-genre" />
         Comedy
         <br />
         <label>
-          <input type="radio" name="wd-genre" checked />
+          <input type="checkbox" name="wd-genre" checked />
           Drama
         </label>
         <br />
-        <input type="radio" name="wd-genre" />
+        <input type="checkbox" name="wd-genre" />
         Sci-Fi
         <br />
-        <input type="radio" name="wd-genre" />
+        <input type="checkbox" name="wd-genre" />
         Horror
         <br />
         Choose your single favorite color:
