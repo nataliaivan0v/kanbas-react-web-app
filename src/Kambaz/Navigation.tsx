@@ -29,6 +29,10 @@ export default function KambazNavigation() {
       <Link to="/Labs" id="wd-labs-link">
         Labs
       </Link>
+      <br></br>
+      <Link to="/" id="wd-landing-page-link">
+        Landing Page
+      </Link>
       <br />
     </div>
   );

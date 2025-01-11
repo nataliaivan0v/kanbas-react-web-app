@@ -20,7 +20,13 @@ export default function TOC() {
           <Link to="/Kambaz">Kambaz</Link>
         </li>
         <li>
-          No relevant source code repositories, only used given code from textbook
+          <Link to="/" id="wd-landing-page-link">
+            Landing Page
+          </Link>
+        </li>
+        <li>
+          No relevant source code repositories, only used given code from
+          textbook
         </li>
       </ul>
     </div>
