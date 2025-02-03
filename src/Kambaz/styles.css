@@ -28,3 +28,31 @@ body * {  font-family: Arial, Helvetica, sans-serif;  }
 .wd-lesson {
   border-left: 3px solid green !important;
 }
+
+#wd-modules {
+  width: 725px;
+}
+
+#wd-assignment-text {
+  margin-left: 15px;
+}
+
+#wd-module-text {
+  font-size: 18px;
+}
+
+#wd-search-assignment {
+  margin-right: 100px;
+}
+
+#wd-add-assignment-group {
+  margin-right: 5px;
+}
+
+#wd-name {
+  width: 550px;
+}
+
+#wd-account-navigation {
+  margin-right: 30px;
+}

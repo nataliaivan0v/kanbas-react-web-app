@@ -4,10 +4,10 @@ export default function CourseNavigation() {
   const location = useLocation();
 
   const getLinkClass = (path: string) =>
-    location.pathname === path
+    location.pathname.startsWith(path)
       ? "list-group-item active border-0"
       : "list-group-item text-danger border border-0";
-
+      
   return (
     <div id="wd-courses-navigation" className="wd list-group fs-5 rounded-0 bg-white d-none d-md-block">
       <Link to="/Kambaz/Courses/1234/Home" id="wd-course-home-link" className={getLinkClass("/Kambaz/Courses/1234/Home")}>
