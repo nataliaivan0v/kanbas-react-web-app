@@ -1,11 +1,22 @@
 import { Button } from "react-bootstrap";
+import { Link, useParams } from "react-router-dom";
+import * as db from "../../Database";
 
 export default function AssignmentEditor() {
+  const { cid, aid } = useParams();
+  const assignments = db.assignments;
+
+  const assignment = assignments.find((assignment) => assignment._id === aid);
+
+  if (!assignment) {
+    return <div>Assignment not found</div>;
+  }
+
   return (
     <div id="wd-assignments-editor">
       <text>Assignment Name</text>
       <br></br>
-      <input id="wd-name" value="A1 - ENV + HTML" />
+      <input id="wd-name" value={assignment.title} />
       <br />
       <br />
       <div
@@ -282,16 +293,20 @@ export default function AssignmentEditor() {
         </tr>
       </table>
       <div style={{ paddingLeft: "410px", paddingTop: "10px" }}>
-        <Button
-          id="wd-cancel-button"
-          variant="secondary"
-          style={{ marginRight: "5px" }}
-        >
-          Cancel
-        </Button>
-        <Button id="wd-save-button" variant="danger">
-          Save
-        </Button>
+      <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <Button
+            id="wd-cancel-button"
+            variant="secondary"
+            style={{ marginRight: "5px" }}
+          >
+            Cancel
+          </Button>
+        </Link>
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+          <Button id="wd-save-button" variant="danger">
+            Save
+          </Button>
+        </Link>
       </div>
     </div>
   );

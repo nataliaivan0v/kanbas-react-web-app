@@ -7,9 +7,17 @@ import { LuClipboardPenLine } from "react-icons/lu";
 import { IoEllipsisVertical } from "react-icons/io5";
 import { BsPlus } from "react-icons/bs";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { Link } from "react-router-dom";
+import { Link, useParams } from "react-router-dom";
+import * as db from "../../Database"; 
 
 export default function Assignments() {
+  const { cid } = useParams();
+  const assignments = db.assignments;
+
+  const courseAssignments = assignments.filter(
+    (assignment) => assignment.course === cid
+  );
+
   return (
     <div id="wd-assignments" className="align-items-center mb-3">
       <div className="d-flex align-items-center mb-3">
@@ -45,7 +53,6 @@ export default function Assignments() {
       <ListGroup className="rounded-0" id="wd-modules">
         <ListGroup.Item className="wd-module p-0 mb-5 fs-5 border-gray">
           <div className="wd-title p-3 ps-2 bg-secondary">
-            {" "}
             <BsGripVertical className=" fs-3" />
             <IoMdArrowDropdown style={{ marginRight: "5px" }} />
             <b>ASSIGNMENTS</b>{" "}
@@ -58,78 +65,33 @@ export default function Assignments() {
             </div>
           </div>
           <ListGroup className="wd-lessons rounded-0">
-            <Link
-              to="/Kambaz/Courses/1234/Assignments/123"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <ListGroup.Item className="wd-lesson p-3 d-flex align-items-center">
-                <BsGripVertical className="me-2 fs-3" />
-                <LuClipboardPenLine
-                  style={{ color: "green" }}
-                  className="me-2 fs-4"
-                />
-                <div id="wd-assignment-text" className="flex-grow-1">
-                  <b>A1</b> <br />
-                  <span id="wd-module-text">
-                    <span style={{ color: "red" }}>Multiple Modules</span> |{" "}
-                    <b>Not available until </b>May 6 at 12:00am |
-                  </span>
-                  <br />
-                  <span id="wd-module-text">
-                    <b>Due </b> May 13 11:59pm | 100 points
-                  </span>
-                </div>
-                <LessonControlButtons />
-              </ListGroup.Item>
-            </Link>
-            <Link
-              to="/Kambaz/Courses/1234/Assignments/124"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <ListGroup.Item className="wd-lesson p-3 d-flex align-items-center">
-                <BsGripVertical className="me-2 fs-3" />
-                <LuClipboardPenLine
-                  style={{ color: "green" }}
-                  className="me-2 fs-4"
-                />
-                <div id="wd-assignment-text" className="flex-grow-1">
-                  <b>A2</b> <br />
-                  <span id="wd-module-text">
-                    <span style={{ color: "red" }}>Multiple Modules</span> |{" "}
-                    <b>Not available until </b>May 13 at 12:00am |
-                  </span>
-                  <br />
-                  <span id="wd-module-text">
-                    <b>Due </b> May 20 11:59pm | 100 points
-                  </span>
-                </div>
-                <LessonControlButtons />
-              </ListGroup.Item>
-            </Link>
-            <Link
-              to="/Kambaz/Courses/1234/Assignments/124"
-              style={{ textDecoration: "none", color: "inherit" }}
-            >
-              <ListGroup.Item className="wd-lesson p-3 d-flex align-items-center">
-                <BsGripVertical className="me-2 fs-3" />
-                <LuClipboardPenLine
-                  style={{ color: "green" }}
-                  className="me-2 fs-4"
-                />
-                <div id="wd-assignment-text" className="flex-grow-1">
-                  <b>A3</b> <br />
-                  <span id="wd-module-text">
-                    <span style={{ color: "red" }}>Multiple Modules</span> |{" "}
-                    <b>Not available until </b>May 20 at 12:00am |
-                  </span>
-                  <br />
-                  <span id="wd-module-text">
-                    <b>Due </b> May 27 11:59pm | 100 points
-                  </span>
-                </div>
-                <LessonControlButtons />
-              </ListGroup.Item>
-            </Link>
+            {courseAssignments.map((assignment) => (
+              <Link
+                to={`/Kambaz/Courses/${assignment.course}/Assignments/${assignment._id}`}
+                key={assignment._id}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                <ListGroup.Item className="wd-lesson p-3 d-flex align-items-center">
+                  <BsGripVertical className="me-2 fs-3" />
+                  <LuClipboardPenLine
+                    style={{ color: "green" }}
+                    className="me-2 fs-4"
+                  />
+                  <div id="wd-assignment-text" className="flex-grow-1">
+                    <b>{assignment._id}</b> <br />
+                    <span id="wd-module-text">
+                      <span style={{ color: "red" }}>Multiple Modules</span> |{" "}
+                      <b>Not available until </b>May 6 at 12:00am |
+                    </span>
+                    <br />
+                    <span id="wd-module-text">
+                      <b>Due </b> May 13 11:59pm | 100 points
+                    </span>
+                  </div>
+                  <LessonControlButtons />
+                </ListGroup.Item>
+              </Link>
+            ))}
           </ListGroup>
         </ListGroup.Item>
       </ListGroup>
