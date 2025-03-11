@@ -56,7 +56,17 @@ export default function Dashboard({
       />
       <br />
       <h2 id="wd-dashboard-published">
-        Published Courses ({courses.length})
+        Published Courses (
+        {
+          courses.filter((course) =>
+            enrollments.some(
+              (enrollment) =>
+                enrollment.user === currentUser._id &&
+                enrollment.course === course._id
+            )
+          ).length
+        }
+        )
       </h2>{" "}
       <hr />
       <div id="wd-dashboard-courses">

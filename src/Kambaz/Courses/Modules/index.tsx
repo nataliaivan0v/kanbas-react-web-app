@@ -3,16 +3,13 @@ import { BsGripVertical } from "react-icons/bs";
 import ModuleControlButtons from "./ModuleControlButtons";
 import LessonControlButtons from "./LessonControlButtons";
 import { useParams } from "react-router";
-import * as db from "../../Database";
 import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import { FormControl } from "react-bootstrap";
 import { addModule, editModule, updateModule, deleteModule } from "./reducer";
 import { useSelector, useDispatch } from "react-redux";
 
 export default function Modules() {
   const { cid } = useParams();
-  const [modules, setModules] = useState<any[]>(db.modules); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [moduleName, setModuleName] = useState("");
   const { modules } = useSelector((state: any) => state.modulesReducer); // eslint-disable-line @typescript-eslint/no-explicit-any
   const dispatch = useDispatch();
