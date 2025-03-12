@@ -1,51 +1,297 @@
 import { Button } from "react-bootstrap";
-import { Link, useParams } from "react-router-dom";
-import * as db from "../../Database";
+import { Link, useParams, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
+import { addAssignment, updateAssignment } from "./reducer";
+import { useSelector } from "react-redux";
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts"; 
+import { useState } from "react";
 
 export default function AssignmentEditor() {
-  const { cid, aid } = useParams();
-  const assignments = db.assignments;
+  const { cid, aid } = useParams<{ cid: string; aid: string }>();
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const assignment = assignments.find((assignment) => assignment._id === aid);
+  const assignments = useSelector((state: RootState) => state.assignmentsReducer.assignments);
+  const currAssignment = assignments.find(
+    (assignment) => assignment._id === aid
+  );
 
-  if (!assignment) {
-    return <div>Assignment not found</div>;
+  const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
+  const [dueDate, setDueDate] = useState("");
+  const [availableFrom, setAvailableFrom] = useState("");
+  const [availableUntil, setAvailableUntil] = useState("");
+  const [points, setPoints] = useState("100");
+
+  const [titleExisting, setTitleExisting] = useState(currAssignment?.title || "");
+  const [descriptionExisting, setDescriptionExisting] = useState(currAssignment?.description || "The assignment is available online. Submit a link to the landing page of your Web application running on Netlify. The landing page should include the following:\nYour full name and section\nLinks to each of the lab assignments\nLink to the Kanbas application\nLinks to all relevant source code repositories.\nThe Kanbas application should include a link to navigate back to the landing page.");
+  const [pointsExisting, setPointsExisting] = useState(currAssignment?.points || "100");
+  const [dueDateExisting, setDueDateExisting] = useState(currAssignment?.dueDate || "");
+  const [availableFromExisting, setAvailableFromExisting] = useState(currAssignment?.availableFrom || "");
+  const [availableUntilExisting, setAvailableUntilExisting] = useState(currAssignment?.availableUntil || "");
+
+  const assignment: {
+    title: string;
+    description: string;
+    dueDate: string;
+    availableFrom: string;
+    availableUntil: string;
+    points: string;
+    course: string | undefined;
+  } = {
+    title: title,
+    description: description,
+    dueDate: dueDate,
+    availableFrom: availableFrom,
+    availableUntil: availableUntil,
+    points: points,
+    course: cid,
+  };
+
+  const updatedAssignment: {
+    title: string;
+    description: string;
+    dueDate: string;
+    availableFrom: string;
+    availableUntil: string;
+    points: string;
+    course: string | undefined;
+    _id: string | undefined;
+  } = {
+    title: titleExisting,
+    description: descriptionExisting,
+    dueDate: dueDateExisting,
+    availableFrom: availableFromExisting,
+    availableUntil: availableUntilExisting,
+    points: pointsExisting,
+    course: cid,
+    _id: aid,
+  };
+
+  const handleSave = () => {
+    dispatch(addAssignment(assignment));
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
+
+  const handleSaveExisting = () => {
+    dispatch(updateAssignment(updatedAssignment));
+    console.log("updated:", updatedAssignment)
+    navigate(`/Kambaz/Courses/${cid}/Assignments`);
+  };
+
+  if (!currAssignment) {
+    return (
+      <div id="wd-assignments-editor">
+        <text>Assignment Name</text>
+        <br></br>
+        <input
+          id="wd-name"
+          name="title"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+        />
+        <br />
+        <br />
+        <textarea
+          id="wd-description"
+          placeholder="Assignment description"
+          value={description} onChange={(e) => setDescription(e.target.value)}
+          style={{
+            width: "550px",
+            height: "330px",
+            border: "1px solid",
+            borderRadius: "2px",
+            padding: "10px",
+            textAlign: "start",
+            verticalAlign: "top",
+          }}
+        />
+        <br />
+        <br />
+        <table style={{ borderBottom: "1px solid grey" }}>
+          <tr>
+            <td align="right" valign="top">
+              <label htmlFor="wd-points" style={{ paddingRight: "7px" }}>
+                Points
+              </label>
+            </td>
+            <td>
+              <input
+                type="number"
+                id="wd-points"
+                style={{ width: "410px" }}
+                value={points}
+                onChange={(e) => setPoints(e.target.value)}
+              />
+            </td>
+          </tr>
+          <br />
+          <tr>
+            <td align="right" valign="top">
+              <label htmlFor="wd-assign" style={{ paddingRight: "7px" }}>
+                Assign
+              </label>
+            </td>
+            <div
+              style={{
+                border: "1px solid",
+                borderRadius: "2px",
+                padding: "10px",
+              }}
+            >
+              <td align="left" valign="top">
+                <label htmlFor="wd-assign-to">
+                  <b>Assign to</b>
+                </label>
+              </td>
+              <tr>
+                <td>
+                  <div
+                    style={{
+                      display: "inline-flex",
+                      padding: "5px 5px",
+                      borderRadius: "2px",
+                      fontSize: "14px",
+                      color: "#555",
+                      border: "1px solid",
+                      width: "390px",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        backgroundColor: "#f0f0f0",
+                        padding: "5px 10px",
+                        borderRadius: "2px",
+                        fontSize: "14px",
+                        color: "#555",
+                      }}
+                    >
+                      <span>Everyone</span>
+                      <button
+                        style={{
+                          background: "none",
+                          border: "none",
+                          color: "#888",
+                          fontSize: "13px",
+                          marginLeft: "8px",
+                          cursor: "pointer",
+                        }}
+                      >
+                        X
+                      </button>
+                    </div>
+                  </div>
+                </td>
+              </tr>
+              <br></br>
+              <tr>
+                <td></td>
+                <td align="left" valign="top">
+                  <label htmlFor="wd-due-date">
+                    <b>Due</b>
+                  </label>
+                </td>
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <input
+                    defaultValue="2025-05-03"
+                    type="date"
+                    id="wd-due-date"
+                    style={{ width: "388px" }}
+                    value={dueDate}
+                    onChange={(e) => setDueDate(e.target.value)}
+                  />
+                </td>
+              </tr>
+              <br></br>
+              <tr>
+                <td></td>
+                <td align="left" valign="top">
+                  <label htmlFor="wd-available-from">
+                    <b>Available from</b>
+                  </label>
+                </td>
+                <td align="left" valign="top">
+                  <label htmlFor="wd-available-until">
+                    <b>Until</b>
+                  </label>
+                </td>
+                <br />
+              </tr>
+              <tr>
+                <td></td>
+                <td>
+                  <input
+                    defaultValue="2025-05-06"
+                    type="date"
+                    id="wd-available-from"
+                    style={{ width: "194px" }}
+                    value={availableFrom}
+                    onChange={(e) => setAvailableFrom(e.target.value)}
+                  />
+                </td>
+                <td>
+                  <input
+                    defaultValue="2025-05-20"
+                    type="date"
+                    id="wd-available-until"
+                    style={{ width: "194px" }}
+                    value={availableUntil}
+                    onChange={(e) => setAvailableUntil(e.target.value)}
+                  />
+                </td>
+                <br />
+              </tr>
+            </div>
+            <br></br>
+          </tr>
+        </table>
+        <div style={{ paddingLeft: "410px", paddingTop: "10px" }}>
+          <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+            <Button
+              id="wd-cancel-button"
+              variant="secondary"
+              style={{ marginRight: "5px" }}
+            >
+              Cancel
+            </Button>
+          </Link>
+          <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+            <Button id="wd-save-button" variant="danger" onClick={handleSave}>
+              Save
+            </Button>
+          </Link>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div id="wd-assignments-editor">
       <text>Assignment Name</text>
       <br></br>
-      <input id="wd-name" value={assignment.title} />
+      <input id="wd-name" value={titleExisting} onChange={(e) => setTitleExisting(e.target.value)} />
       <br />
       <br />
-      <div
-        id="wd-description"
-        style={{
-          width: "550px",
-          height: "330px",
-          border: "1px solid",
-          borderRadius: "2px",
-          padding: "10px",
-        }}
-      >
-        The assignment is <span style={{ color: "red" }}>available online</span>
-        <br />
-        <br />
-        Submit a link to the landing page of your Web application running on
-        Netlify.
-        <br />
-        <br />
-        The landing page should include the following:
-        <ul>
-          <li>Your full name and section</li>
-          <li>Links to each of the lab assignments</li>
-          <li>Link to the Kanbas application</li>
-          <li>Links to all relevant source code repositories</li>
-        </ul>
-        The Kanbas application should include a link to navigate back to the
-        landing page.
-      </div>
+      <textarea
+          id="wd-description"
+          placeholder="Assignment description"
+          value={descriptionExisting} onChange={(e) => setDescriptionExisting(e.target.value)}
+          style={{
+            width: "550px",
+            height: "330px",
+            border: "1px solid",
+            borderRadius: "2px",
+            padding: "10px",
+            textAlign: "start",
+            verticalAlign: "top",
+          }}
+        />
+      <br />
       <br />
       <table style={{ borderBottom: "1px solid grey" }}>
         <tr>
@@ -55,7 +301,7 @@ export default function AssignmentEditor() {
             </label>
           </td>
           <td>
-            <input id="wd-points" value={100} style={{ width: "410px" }} />
+            <input id="wd-points" value={pointsExisting} onChange={(e) => setPointsExisting(e.target.value)} style={{ width: "410px" }} />
           </td>
         </tr>
         <br />
@@ -195,42 +441,43 @@ export default function AssignmentEditor() {
             </td>
             <tr>
               <td>
-                <div style={{
+                <div
+                  style={{
                     display: "inline-flex",
                     padding: "5px 5px",
                     borderRadius: "2px",
                     fontSize: "14px",
                     color: "#555",
                     border: "1px solid",
-                    width: "390px"
-                  }}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    backgroundColor: "#f0f0f0",
-                    padding: "5px 10px",
-                    borderRadius: "2px",
-                    fontSize: "14px",
-                    color: "#555",
+                    width: "390px",
                   }}
                 >
-                  <span>Everyone</span>
-                  <button
+                  <div
                     style={{
-                      background: "none",
-                      border: "none",
-                      color: "#888",
-                      fontSize: "13px",
-                      marginLeft: "8px",
-                      cursor: "pointer",
+                      display: "inline-flex",
+                      alignItems: "center",
+                      backgroundColor: "#f0f0f0",
+                      padding: "5px 10px",
+                      borderRadius: "2px",
+                      fontSize: "14px",
+                      color: "#555",
                     }}
                   >
-                    X
-                  </button>
+                    <span>Everyone</span>
+                    <button
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "#888",
+                        fontSize: "13px",
+                        marginLeft: "8px",
+                        cursor: "pointer",
+                      }}
+                    >
+                      X
+                    </button>
+                  </div>
                 </div>
-                </div>
-                
               </td>
             </tr>
             <br></br>
@@ -250,6 +497,7 @@ export default function AssignmentEditor() {
                   type="date"
                   id="wd-due-date"
                   style={{ width: "388px" }}
+                  value={dueDateExisting} onChange={(e) => setDueDateExisting(e.target.value)}
                 />
               </td>
             </tr>
@@ -276,6 +524,7 @@ export default function AssignmentEditor() {
                   type="date"
                   id="wd-available-from"
                   style={{ width: "194px" }}
+                  value={availableFromExisting} onChange={(e) => setAvailableFromExisting(e.target.value)}
                 />
               </td>
               <td>
@@ -284,6 +533,7 @@ export default function AssignmentEditor() {
                   type="date"
                   id="wd-available-until"
                   style={{ width: "194px" }}
+                  value={availableUntilExisting} onChange={(e) => setAvailableUntilExisting(e.target.value)}
                 />
               </td>
               <br />
@@ -293,7 +543,7 @@ export default function AssignmentEditor() {
         </tr>
       </table>
       <div style={{ paddingLeft: "410px", paddingTop: "10px" }}>
-      <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
           <Button
             id="wd-cancel-button"
             variant="secondary"
@@ -303,7 +553,7 @@ export default function AssignmentEditor() {
           </Button>
         </Link>
         <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-          <Button id="wd-save-button" variant="danger">
+          <Button id="wd-save-button" variant="danger" onClick={handleSaveExisting}>
             Save
           </Button>
         </Link>

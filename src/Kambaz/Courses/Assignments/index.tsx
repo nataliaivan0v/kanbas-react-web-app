@@ -1,22 +1,27 @@
 import { FaSearch, FaPlus } from "react-icons/fa";
-import { Button } from "react-bootstrap";
-import { ListGroup } from "react-bootstrap";
-import { BsGripVertical } from "react-icons/bs";
-import LessonControlButtons from "../Modules/LessonControlButtons";
+import { Button, ListGroup } from "react-bootstrap";
+import { BsGripVertical, BsPlus } from "react-icons/bs";
 import { LuClipboardPenLine } from "react-icons/lu";
 import { IoEllipsisVertical } from "react-icons/io5";
-import { BsPlus } from "react-icons/bs";
 import { IoMdArrowDropdown } from "react-icons/io";
-import { Link, useParams } from "react-router-dom";
-import * as db from "../../Database"; 
+import { Link, useParams, useNavigate } from "react-router-dom";
+import LessonControlButtons from "../Modules/LessonControlButtons";
+import { useSelector } from "react-redux";
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts"; 
 
 export default function Assignments() {
   const { cid } = useParams();
-  const assignments = db.assignments;
+  const navigate = useNavigate();
+
+  const assignments = useSelector((state: RootState) => state.assignmentsReducer.assignments);
 
   const courseAssignments = assignments.filter(
     (assignment) => assignment.course === cid
   );
+
+  const handleClick = () => {
+    navigate("./Editor");
+  };
 
   return (
     <div id="wd-assignments" className="align-items-center mb-3">
@@ -32,20 +37,13 @@ export default function Assignments() {
             placeholder="Search..."
           />
         </div>
-        <br></br>
 
         <Button id="wd-add-assignment-group" variant="secondary">
-          <FaPlus
-            className="position-relative me-2"
-            style={{ bottom: "1px" }}
-          />
+          <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
           Group
         </Button>
-        <Button variant="danger" id="wd-add-assignment">
-          <FaPlus
-            className="position-relative me-2"
-            style={{ bottom: "1px" }}
-          />
+        <Button variant="danger" id="wd-add-assignment" onClick={handleClick}>
+          <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
           Assignment
         </Button>
       </div>
@@ -53,9 +51,9 @@ export default function Assignments() {
       <ListGroup className="rounded-0" id="wd-modules">
         <ListGroup.Item className="wd-module p-0 mb-5 fs-5 border-gray">
           <div className="wd-title p-3 ps-2 bg-secondary">
-            <BsGripVertical className=" fs-3" />
+            <BsGripVertical className="fs-3" />
             <IoMdArrowDropdown style={{ marginRight: "5px" }} />
-            <b>ASSIGNMENTS</b>{" "}
+            <b>ASSIGNMENTS</b>
             <div className="float-end">
               <span className="badge rounded-pill border border-dark text-dark me-2">
                 40% of total
@@ -73,19 +71,16 @@ export default function Assignments() {
               >
                 <ListGroup.Item className="wd-lesson p-3 d-flex align-items-center">
                   <BsGripVertical className="me-2 fs-3" />
-                  <LuClipboardPenLine
-                    style={{ color: "green" }}
-                    className="me-2 fs-4"
-                  />
+                  <LuClipboardPenLine style={{ color: "green" }} className="me-2 fs-4" />
                   <div id="wd-assignment-text" className="flex-grow-1">
-                    <b>{assignment._id}</b> <br />
+                    <b>{assignment.title}</b> <br />
                     <span id="wd-module-text">
                       <span style={{ color: "red" }}>Multiple Modules</span> |{" "}
-                      <b>Not available until </b>May 6 at 12:00am |
+                      <b>Not available until </b> {assignment.availableFrom} |
                     </span>
                     <br />
                     <span id="wd-module-text">
-                      <b>Due </b> May 13 11:59pm | 100 points
+                      <b>Due </b> {assignment.dueDate} | {assignment.points} points
                     </span>
                   </div>
                   <LessonControlButtons />
