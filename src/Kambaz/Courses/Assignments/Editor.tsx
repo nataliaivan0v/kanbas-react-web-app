@@ -3,7 +3,7 @@ import { Link, useParams, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { addAssignment, updateAssignment } from "./reducer";
 import { useSelector } from "react-redux";
-import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts"; 
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
 import { useState } from "react";
 
 export default function AssignmentEditor() {
@@ -11,7 +11,11 @@ export default function AssignmentEditor() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
-  const assignments = useSelector((state: RootState) => state.assignmentsReducer.assignments);
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
+
+  const assignments = useSelector(
+    (state: RootState) => state.assignmentsReducer.assignments
+  );
   const currAssignment = assignments.find(
     (assignment) => assignment._id === aid
   );
@@ -23,12 +27,25 @@ export default function AssignmentEditor() {
   const [availableUntil, setAvailableUntil] = useState("");
   const [points, setPoints] = useState("100");
 
-  const [titleExisting, setTitleExisting] = useState(currAssignment?.title || "");
-  const [descriptionExisting, setDescriptionExisting] = useState(currAssignment?.description || "The assignment is available online. Submit a link to the landing page of your Web application running on Netlify. The landing page should include the following:\nYour full name and section\nLinks to each of the lab assignments\nLink to the Kanbas application\nLinks to all relevant source code repositories.\nThe Kanbas application should include a link to navigate back to the landing page.");
-  const [pointsExisting, setPointsExisting] = useState(currAssignment?.points || "100");
-  const [dueDateExisting, setDueDateExisting] = useState(currAssignment?.dueDate || "");
-  const [availableFromExisting, setAvailableFromExisting] = useState(currAssignment?.availableFrom || "");
-  const [availableUntilExisting, setAvailableUntilExisting] = useState(currAssignment?.availableUntil || "");
+  const [titleExisting, setTitleExisting] = useState(
+    currAssignment?.title || ""
+  );
+  const [descriptionExisting, setDescriptionExisting] = useState(
+    currAssignment?.description ||
+      "The assignment is available online. Submit a link to the landing page of your Web application running on Netlify. The landing page should include the following:\nYour full name and section\nLinks to each of the lab assignments\nLink to the Kanbas application\nLinks to all relevant source code repositories.\nThe Kanbas application should include a link to navigate back to the landing page."
+  );
+  const [pointsExisting, setPointsExisting] = useState(
+    currAssignment?.points || "100"
+  );
+  const [dueDateExisting, setDueDateExisting] = useState(
+    currAssignment?.dueDate || ""
+  );
+  const [availableFromExisting, setAvailableFromExisting] = useState(
+    currAssignment?.availableFrom || ""
+  );
+  const [availableUntilExisting, setAvailableUntilExisting] = useState(
+    currAssignment?.availableUntil || ""
+  );
 
   const assignment: {
     title: string;
@@ -94,7 +111,8 @@ export default function AssignmentEditor() {
         <textarea
           id="wd-description"
           placeholder="Assignment description"
-          value={description} onChange={(e) => setDescription(e.target.value)}
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
           style={{
             width: "550px",
             height: "330px",
@@ -273,23 +291,28 @@ export default function AssignmentEditor() {
     <div id="wd-assignments-editor">
       <text>Assignment Name</text>
       <br></br>
-      <input id="wd-name" value={titleExisting} onChange={(e) => setTitleExisting(e.target.value)} />
+      <input
+        id="wd-name"
+        value={titleExisting}
+        onChange={(e) => setTitleExisting(e.target.value)}
+      />
       <br />
       <br />
       <textarea
-          id="wd-description"
-          placeholder="Assignment description"
-          value={descriptionExisting} onChange={(e) => setDescriptionExisting(e.target.value)}
-          style={{
-            width: "550px",
-            height: "330px",
-            border: "1px solid",
-            borderRadius: "2px",
-            padding: "10px",
-            textAlign: "start",
-            verticalAlign: "top",
-          }}
-        />
+        id="wd-description"
+        placeholder="Assignment description"
+        value={descriptionExisting}
+        onChange={(e) => setDescriptionExisting(e.target.value)}
+        style={{
+          width: "550px",
+          height: "330px",
+          border: "1px solid",
+          borderRadius: "2px",
+          padding: "10px",
+          textAlign: "start",
+          verticalAlign: "top",
+        }}
+      />
       <br />
       <br />
       <table style={{ borderBottom: "1px solid grey" }}>
@@ -300,7 +323,12 @@ export default function AssignmentEditor() {
             </label>
           </td>
           <td>
-            <input id="wd-points" value={pointsExisting} onChange={(e) => setPointsExisting(e.target.value)} style={{ width: "410px" }} />
+            <input
+              id="wd-points"
+              value={pointsExisting}
+              onChange={(e) => setPointsExisting(e.target.value)}
+              style={{ width: "410px" }}
+            />
           </td>
         </tr>
         <br />
@@ -496,7 +524,8 @@ export default function AssignmentEditor() {
                   type="date"
                   id="wd-due-date"
                   style={{ width: "388px" }}
-                  value={dueDateExisting} onChange={(e) => setDueDateExisting(e.target.value)}
+                  value={dueDateExisting}
+                  onChange={(e) => setDueDateExisting(e.target.value)}
                 />
               </td>
             </tr>
@@ -523,7 +552,8 @@ export default function AssignmentEditor() {
                   type="date"
                   id="wd-available-from"
                   style={{ width: "194px" }}
-                  value={availableFromExisting} onChange={(e) => setAvailableFromExisting(e.target.value)}
+                  value={availableFromExisting}
+                  onChange={(e) => setAvailableFromExisting(e.target.value)}
                 />
               </td>
               <td>
@@ -532,7 +562,8 @@ export default function AssignmentEditor() {
                   type="date"
                   id="wd-available-until"
                   style={{ width: "194px" }}
-                  value={availableUntilExisting} onChange={(e) => setAvailableUntilExisting(e.target.value)}
+                  value={availableUntilExisting}
+                  onChange={(e) => setAvailableUntilExisting(e.target.value)}
                 />
               </td>
               <br />
@@ -541,22 +572,24 @@ export default function AssignmentEditor() {
           <br></br>
         </tr>
       </table>
-      <div style={{ paddingLeft: "410px", paddingTop: "10px" }}>
-        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-          <Button
-            id="wd-cancel-button"
-            variant="secondary"
-            style={{ marginRight: "5px" }}
-          >
-            Cancel
-          </Button>
-        </Link>
-        <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-          <Button id="wd-save-button" variant="danger" onClick={handleSaveExisting}>
-            Save
-          </Button>
-        </Link>
-      </div>
+      {currentUser.role === "FACULTY" && (
+        <div style={{ paddingLeft: "410px", paddingTop: "10px" }}>
+          <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+            <Button
+              id="wd-cancel-button"
+              variant="secondary"
+              style={{ marginRight: "5px" }}
+            >
+              Cancel
+            </Button>
+          </Link>
+          <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
+            <Button id="wd-save-button" variant="danger" onClick={handleSaveExisting}>
+              Save
+            </Button>
+          </Link>
+        </div>
+      )}
     </div>
   );
 }

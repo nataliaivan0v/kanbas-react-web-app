@@ -18,6 +18,7 @@ export default function Assignments() {
   const { cid } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { currentUser } = useSelector((state: any) => state.accountReducer);
 
   const assignments = useSelector(
     (state: RootState) => state.assignmentsReducer.assignments
@@ -73,13 +74,15 @@ export default function Assignments() {
           />
           Group
         </Button>
-        <Button variant="danger" id="wd-add-assignment" onClick={handleClick}>
-          <FaPlus
-            className="position-relative me-2"
-            style={{ bottom: "1px" }}
-          />
-          Assignment
-        </Button>
+        {currentUser.role === "FACULTY" && (
+          <Button variant="danger" id="wd-add-assignment" onClick={handleClick}>
+            <FaPlus
+              className="position-relative me-2"
+              style={{ bottom: "1px" }}
+            />
+            Assignment
+          </Button>
+        )}
       </div>
 
       <ListGroup className="rounded-0" id="wd-modules">
@@ -122,10 +125,12 @@ export default function Assignments() {
                     </span>
                   </div>
                   <LessonControlButtons />
-                  <FaRegTrashAlt
-                    color="red"
-                    onClick={(e) => handleDeleteClick(assignment._id, e)}
-                  />
+                  {currentUser.role === "FACULTY" && (
+                    <FaRegTrashAlt
+                      color="red"
+                      onClick={(e) => handleDeleteClick(assignment._id, e)}
+                    />
+                  )}
                 </ListGroup.Item>
               </Link>
             ))}
