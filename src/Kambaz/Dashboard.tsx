@@ -8,16 +8,16 @@ export default function Dashboard({
   courses,
   course,
   setCourse,
-  addNewCourse,
+  addCourse,
   deleteCourse,
   updateCourse,
 }: {
   courses: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   course: any; // eslint-disable-line @typescript-eslint/no-explicit-any
   setCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
-  addNewCourse: () => void;
+  addCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   deleteCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
-  updateCourse: () => void;
+  updateCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer); // eslint-disable-line @typescript-eslint/no-explicit-any
   const { enrollments } = db;
@@ -30,14 +30,20 @@ export default function Dashboard({
         <button
           className="btn btn-primary float-end"
           id="wd-add-new-course-click"
-          onClick={addNewCourse}
+          onClick={(event) => {
+            event.preventDefault();
+            addCourse(course);
+          }}
         >
           {" "}
           Add{" "}
         </button>
         <button
           className="btn btn-warning float-end me-2"
-          onClick={updateCourse}
+          onClick={(event) => {
+            event.preventDefault();
+            updateCourse(course);
+          }}
           id="wd-update-course-click"
         >
           Update

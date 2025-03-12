@@ -4,38 +4,20 @@ import Dashboard from "./Dashboard";
 import KambazNavigation from "./Navigation";
 import Courses from "./Courses";
 import "./styles.css";
-import * as db from "./Database";
-import { useState } from "react";
-import { v4 as uuidv4 } from "uuid";
 import ProtectedRoute from "./Account/ProtectedRoute";
+import { useSelector, useDispatch } from "react-redux";
+import { addCourse, deleteCourse, updateCourse } from "./Courses/reducer";
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts"; 
+import { useState } from "react";
 
 export default function Kambaz() {
-  const [courses, setCourses] = useState<any[]>(db.courses); // eslint-disable-line @typescript-eslint/no-explicit-any
+  const courses = useSelector((state: RootState) => state.coursesReducer.courses);
+  const dispatch = useDispatch();
+
   const [course, setCourse] = useState<any>({ // eslint-disable-line @typescript-eslint/no-explicit-any
-    _id: "1234",
-    name: "New Course",
-    number: "New Number",
-    startDate: "2023-09-10",
-    endDate: "2023-12-15",
-    description: "New Description",
+    name: "New course",
+    description: "New course description",
   });
-  const addNewCourse = () => {
-    setCourses([...courses, { ...course, _id: uuidv4() }]);
-  };
-  const deleteCourse = (courseId: any) => { // eslint-disable-line @typescript-eslint/no-explicit-any
-    setCourses(courses.filter((course) => course._id !== courseId));
-  };
-  const updateCourse = () => {
-    setCourses(
-      courses.map((c) => {
-        if (c._id === course._id) {
-          return course;
-        } else {
-          return c;
-        }
-      })
-    );
-  };
 
   return (
     <div id="wd-kambaz">
@@ -52,9 +34,9 @@ export default function Kambaz() {
                   courses={courses}
                   course={course}
                   setCourse={setCourse}
-                  addNewCourse={addNewCourse}
-                  deleteCourse={deleteCourse}
-                  updateCourse={updateCourse}
+                  addCourse={(course) => dispatch(addCourse(course))}
+                  deleteCourse={(courseId) => dispatch(deleteCourse(courseId))}
+                  updateCourse={(course) => dispatch(updateCourse(course))}
                 />{" "}
               </ProtectedRoute>
             }

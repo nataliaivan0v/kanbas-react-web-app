@@ -75,7 +75,6 @@ export default function AssignmentEditor() {
 
   const handleSaveExisting = () => {
     dispatch(updateAssignment(updatedAssignment));
-    console.log("updated:", updatedAssignment)
     navigate(`/Kambaz/Courses/${cid}/Assignments`);
   };
 
