@@ -5,15 +5,23 @@ import { LuClipboardPenLine } from "react-icons/lu";
 import { IoEllipsisVertical } from "react-icons/io5";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import LessonControlButtons from "../Modules/LessonControlButtons";
 import { useSelector } from "react-redux";
-import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts"; 
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
+import { FaRegTrashAlt } from "react-icons/fa";
+import { deleteAssignment } from "./reducer";
+import { useState } from "react";
+import { Modal } from "react-bootstrap";
 
 export default function Assignments() {
   const { cid } = useParams();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const assignments = useSelector((state: RootState) => state.assignmentsReducer.assignments);
+  const assignments = useSelector(
+    (state: RootState) => state.assignmentsReducer.assignments
+  );
 
   const courseAssignments = assignments.filter(
     (assignment) => assignment.course === cid
@@ -21,6 +29,26 @@ export default function Assignments() {
 
   const handleClick = () => {
     navigate("./Editor");
+  };
+
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState(null);
+
+  const handleDeleteClick = (assignmentId: string, e: React.MouseEvent) => {
+    e.preventDefault();
+    setAssignmentToDelete(assignmentId);
+    setShowDeleteModal(true);
+  };
+
+  const handleDeleteConfirm = () => {
+    dispatch(deleteAssignment(assignmentToDelete));
+    setShowDeleteModal(false);
+    setAssignmentToDelete(null);
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteModal(false);
+    setAssignmentToDelete(null);
   };
 
   return (
@@ -39,11 +67,17 @@ export default function Assignments() {
         </div>
 
         <Button id="wd-add-assignment-group" variant="secondary">
-          <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+          <FaPlus
+            className="position-relative me-2"
+            style={{ bottom: "1px" }}
+          />
           Group
         </Button>
         <Button variant="danger" id="wd-add-assignment" onClick={handleClick}>
-          <FaPlus className="position-relative me-2" style={{ bottom: "1px" }} />
+          <FaPlus
+            className="position-relative me-2"
+            style={{ bottom: "1px" }}
+          />
           Assignment
         </Button>
       </div>
@@ -71,7 +105,10 @@ export default function Assignments() {
               >
                 <ListGroup.Item className="wd-lesson p-3 d-flex align-items-center">
                   <BsGripVertical className="me-2 fs-3" />
-                  <LuClipboardPenLine style={{ color: "green" }} className="me-2 fs-4" />
+                  <LuClipboardPenLine
+                    style={{ color: "green" }}
+                    className="me-2 fs-4"
+                  />
                   <div id="wd-assignment-text" className="flex-grow-1">
                     <b>{assignment.title}</b> <br />
                     <span id="wd-module-text">
@@ -80,16 +117,38 @@ export default function Assignments() {
                     </span>
                     <br />
                     <span id="wd-module-text">
-                      <b>Due </b> {assignment.dueDate} | {assignment.points} points
+                      <b>Due </b> {assignment.dueDate} | {assignment.points}{" "}
+                      points
                     </span>
                   </div>
                   <LessonControlButtons />
+                  <FaRegTrashAlt
+                    color="red"
+                    onClick={(e) => handleDeleteClick(assignment._id, e)}
+                  />
                 </ListGroup.Item>
               </Link>
             ))}
           </ListGroup>
         </ListGroup.Item>
       </ListGroup>
+
+      <Modal show={showDeleteModal} onHide={handleDeleteCancel}>
+        <Modal.Header closeButton>
+          <Modal.Title>Confirm Deletion</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>
+          Are you sure you want to delete this assignment?
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleDeleteCancel}>
+            No
+          </Button>
+          <Button variant="danger" onClick={handleDeleteConfirm}>
+            Yes, Delete
+          </Button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 }
