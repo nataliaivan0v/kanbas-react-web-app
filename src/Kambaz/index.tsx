@@ -7,11 +7,14 @@ import "./styles.css";
 import ProtectedRoute from "./Account/ProtectedRoute";
 import { useSelector, useDispatch } from "react-redux";
 import { addCourse, deleteCourse, updateCourse } from "./Courses/reducer";
-import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts"; 
+import { enrollInCourse, unenrollFromCourse } from "./reducer";
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
 import { useState } from "react";
 
 export default function Kambaz() {
-  const courses = useSelector((state: RootState) => state.coursesReducer.courses);
+  const courses = useSelector(
+    (state: RootState) => state.coursesReducer.courses
+  );
   const dispatch = useDispatch();
 
   const [course, setCourse] = useState<any>({ // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -37,6 +40,8 @@ export default function Kambaz() {
                   addCourse={(course) => dispatch(addCourse(course))}
                   deleteCourse={(courseId) => dispatch(deleteCourse(courseId))}
                   updateCourse={(course) => dispatch(updateCourse(course))}
+                  enrollInCourse={(userId, courseId) => dispatch(enrollInCourse({ userId, courseId }))}
+                  unenrollFromCourse={(userId, courseId) => dispatch(unenrollFromCourse({ userId, courseId }))}              
                 />{" "}
               </ProtectedRoute>
             }

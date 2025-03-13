@@ -2,7 +2,8 @@ import { Link } from "react-router-dom";
 import { Row, Col, Card, Button } from "react-bootstrap";
 import { FormControl } from "react-bootstrap";
 import { useSelector } from "react-redux";
-import * as db from "./Database";
+import { useState } from "react";
+import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
 
 export default function Dashboard({
   courses,
@@ -11,6 +12,8 @@ export default function Dashboard({
   addCourse,
   deleteCourse,
   updateCourse,
+  enrollInCourse,
+  unenrollFromCourse,
 }: {
   courses: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   course: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -18,9 +21,25 @@ export default function Dashboard({
   addCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   deleteCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   updateCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  enrollInCourse: (userId: string, courseId: string) => void;
+  unenrollFromCourse: (userId: string, courseId: string) => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer); // eslint-disable-line @typescript-eslint/no-explicit-any
-  const { enrollments } = db;
+  const [showAllCourses, setShowAllCourses] = useState(false);
+
+  const toggleShowCourses = () => {
+    setShowAllCourses(!showAllCourses);
+  };
+
+  const enrollments = useSelector(
+    (state: RootState) => state.enrollmentsReducer.enrollments
+  );
+
+  const isEnrolled = (courseId: string) =>
+    enrollments.some(
+      (enrollment) =>
+        enrollment.user === currentUser._id && enrollment.course === courseId
+    );
 
   return (
     <div id="wd-dashboard">
@@ -67,6 +86,15 @@ export default function Dashboard({
           <br />
         </>
       )}
+      {currentUser.role === "STUDENT" && (
+        <Button
+          className="float-end"
+          variant="primary"
+          onClick={toggleShowCourses}
+        >
+          {showAllCourses ? "Show Enrolled Courses" : "Show All Courses"}
+        </Button>
+      )}
       <h2 id="wd-dashboard-published">
         Published Courses (
         {
@@ -84,13 +112,7 @@ export default function Dashboard({
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
           {courses
-            .filter((course) =>
-              enrollments.some(
-                (enrollment) =>
-                  enrollment.user === currentUser._id &&
-                  enrollment.course === course._id
-              )
-            )
+            .filter((course) => showAllCourses || isEnrolled(course._id))
             .map((course) => (
               <Col className="wd-dashboard-course" style={{ width: "300px" }}>
                 <Card>
@@ -138,6 +160,30 @@ export default function Dashboard({
                             Edit
                           </button>
                         </>
+                      )}
+                      {currentUser.role === "STUDENT" && (
+                        <button
+                          onClick={(event) => {
+                            event.preventDefault();
+                            if (isEnrolled(course._id)) {
+                              unenrollFromCourse(currentUser._id, course._id);
+                            } else {
+                              enrollInCourse(currentUser._id, course._id);
+                            }
+                          }}
+                          className={`btn ${
+                            isEnrolled(course._id)
+                              ? "btn-danger"
+                              : "btn-success"
+                          } float-end`}
+                          id={
+                            isEnrolled(course._id)
+                              ? "wd-unenroll-course-click"
+                              : "wd-enroll-course-click"
+                          }
+                        >
+                          {isEnrolled(course._id) ? "Unenroll" : "Enroll"}
+                        </button>
                       )}
                     </Card.Body>
                   </Link>

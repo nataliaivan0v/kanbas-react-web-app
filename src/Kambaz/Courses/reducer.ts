@@ -22,7 +22,6 @@ const courseSlice = createSlice({
         credits: "",
       };
       state.courses = [...state.courses, newCourse] as any; // eslint-disable-line @typescript-eslint/no-explicit-any
-      console.log("courses", state.courses)
     },
     deleteCourse: (state, { payload: courseId }) => {
       state.courses = state.courses.filter(
