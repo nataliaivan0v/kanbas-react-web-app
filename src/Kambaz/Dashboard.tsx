@@ -4,6 +4,7 @@ import { FormControl } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
+import * as enrollmentsClient from "./client";
 
 export default function Dashboard({
   courses,
@@ -112,6 +113,7 @@ export default function Dashboard({
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
           {courses
+            .filter((course) => showAllCourses || isEnrolled(course._id))
             .map((course) => (
               <Col className="wd-dashboard-course" style={{ width: "300px" }}>
                 <Card>

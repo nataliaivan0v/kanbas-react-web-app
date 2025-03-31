@@ -1,21 +1,24 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Button } from "react-bootstrap";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
-import { addAssignment, updateAssignment } from "./reducer";
 import { useSelector } from "react-redux";
-import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import * as assignmentsClient from "./client";
 
 export default function AssignmentEditor() {
   const { cid, aid } = useParams<{ cid: string; aid: string }>();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
 
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const assignments = useSelector(
-    (state: RootState) => state.assignmentsReducer.assignments
-  );
+  const [assignments, setAssignments] = useState<any[]>([]);
+
+  useEffect(() => {
+    if (cid) {
+      assignmentsClient.findAssignmentsForCourse(cid).then(setAssignments);
+    }
+  }, [cid]);
+
   const currAssignment = assignments.find(
     (assignment) => assignment._id === aid
   );
@@ -86,12 +89,12 @@ export default function AssignmentEditor() {
   };
 
   const handleSave = () => {
-    dispatch(addAssignment(assignment));
+    assignmentsClient.createAssignmentForCourse(cid as string, assignment);
     navigate(`/Kambaz/Courses/${cid}/Assignments`);
   };
 
   const handleSaveExisting = () => {
-    dispatch(updateAssignment(updatedAssignment));
+    assignmentsClient.updateAssignment(updatedAssignment);
     navigate(`/Kambaz/Courses/${cid}/Assignments`);
   };
 
@@ -584,7 +587,11 @@ export default function AssignmentEditor() {
             </Button>
           </Link>
           <Link to={`/Kambaz/Courses/${cid}/Assignments`}>
-            <Button id="wd-save-button" variant="danger" onClick={handleSaveExisting}>
+            <Button
+              id="wd-save-button"
+              variant="danger"
+              onClick={handleSaveExisting}
+            >
               Save
             </Button>
           </Link>

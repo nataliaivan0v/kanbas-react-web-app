@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { FaSearch, FaPlus } from "react-icons/fa";
 import { Button, ListGroup } from "react-bootstrap";
 import { BsGripVertical, BsPlus } from "react-icons/bs";
@@ -5,35 +6,32 @@ import { LuClipboardPenLine } from "react-icons/lu";
 import { IoEllipsisVertical } from "react-icons/io5";
 import { IoMdArrowDropdown } from "react-icons/io";
 import { Link, useParams, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
 import LessonControlButtons from "../Modules/LessonControlButtons";
 import { useSelector } from "react-redux";
-import { RootState } from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/store.ts";
 import { FaRegTrashAlt } from "react-icons/fa";
-import { deleteAssignment } from "./reducer";
 import { useState } from "react";
 import { Modal } from "react-bootstrap";
+import * as assignmentsClient from "./client";
+import { useEffect } from "react";
 
 export default function Assignments() {
   const { cid } = useParams();
   const navigate = useNavigate();
-  const dispatch = useDispatch();
   const { currentUser } = useSelector((state: any) => state.accountReducer);
 
-  const assignments = useSelector(
-    (state: RootState) => state.assignmentsReducer.assignments
-  );
+  const [assignments, setAssignments] = useState<any[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [assignmentToDelete, setAssignmentToDelete] = useState<string | null>(null);
 
-  const courseAssignments = assignments.filter(
-    (assignment) => assignment.course === cid
-  );
+  useEffect(() => {
+    if (cid) {
+      assignmentsClient.findAssignmentsForCourse(cid).then(setAssignments);
+    }
+  }, [cid]);
 
   const handleClick = () => {
     navigate("./Editor");
   };
-
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [assignmentToDelete, setAssignmentToDelete] = useState(null);
 
   const handleDeleteClick = (assignmentId: string, e: React.MouseEvent) => {
     e.preventDefault();
@@ -42,7 +40,10 @@ export default function Assignments() {
   };
 
   const handleDeleteConfirm = () => {
-    dispatch(deleteAssignment(assignmentToDelete));
+    if (assignmentToDelete) {
+      assignmentsClient.deleteAssignment(assignmentToDelete);
+      setAssignments(assignments.filter(a => a._id !== assignmentToDelete));
+    }
     setShowDeleteModal(false);
     setAssignmentToDelete(null);
   };
@@ -100,7 +101,7 @@ export default function Assignments() {
             </div>
           </div>
           <ListGroup className="wd-lessons rounded-0">
-            {courseAssignments.map((assignment) => (
+            {assignments.map((assignment) => (
               <Link
                 to={`/Kambaz/Courses/${assignment.course}/Assignments/${assignment._id}`}
                 key={assignment._id}
