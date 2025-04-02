@@ -13,6 +13,8 @@ export default function Dashboard({
   addCourse,
   deleteCourse,
   updateCourse,
+  enrollInCourse,
+  unenrollFromCourse,
 }: {
   courses: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   course: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -20,10 +22,14 @@ export default function Dashboard({
   addCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   deleteCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   updateCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
+  enrollInCourse: (userId: string, courseId: string) => void;
+  unenrollFromCourse: (userId: string, courseId: string) => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showAllCourses, setShowAllCourses] = useState(false);
-  const [enrollments, setEnrollments] = useState<{ user: string; course: string }[]>([]);
+  const [enrollments, setEnrollments] = useState<
+    { user: string; course: string }[]
+  >([]);
   const [allCourses, setAllCourses] = useState([]);
 
   const toggleShowCourses = () => {
@@ -39,11 +45,6 @@ export default function Dashboard({
     }
   };
 
-  if (showAllCourses) {
-    courses = allCourses;
-    fetchEnrollments();
-  }
-
   const fetchAllCourses = async () => {
     try {
       const courses = await coursesClient.fetchAllCourses();
@@ -52,6 +53,21 @@ export default function Dashboard({
       console.error("Error fetching courses:", error);
     }
   };
+
+  if (showAllCourses) {
+    fetchAllCourses();
+    courses = allCourses;
+    fetchEnrollments();
+  } else {
+    fetchAllCourses();
+    courses = allCourses.filter((course) =>
+      enrollments.some(
+        (enrollment) =>
+          enrollment.user === currentUser._id &&
+          enrollment.course === course._id
+      )
+    );
+  }
 
   if (enrollments.length == 0) {
     fetchEnrollments();
@@ -63,16 +79,6 @@ export default function Dashboard({
       (enrollment) =>
         enrollment.user === currentUser._id && enrollment.course === courseId
     );
-
-  const enrollInCourse = async (userId: string, courseId: string) => {
-    await enrollmentsClient.enrollUserInCourse(userId, courseId);
-    fetchEnrollments();
-  };
-
-  const unenrollFromCourse = async (userId: string, courseId: string) => {
-    await enrollmentsClient.unenrollUserFromCourse(userId, courseId);
-    fetchEnrollments();
-  };
 
   return (
     <div id="wd-dashboard">
@@ -128,10 +134,7 @@ export default function Dashboard({
           {showAllCourses ? "Show Enrolled Courses" : "Show All Courses"}
         </Button>
       )}
-      <h2 id="wd-dashboard-published">
-        Published Courses
-      </h2>{" "}
-      <hr />
+      <h2 id="wd-dashboard-published">Published Courses</h2> <hr />
       <div id="wd-dashboard-courses">
         <Row xs={1} md={5} className="g-4">
           {courses.map((course) => (
