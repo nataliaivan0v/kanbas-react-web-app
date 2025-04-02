@@ -58,15 +58,6 @@ export default function Dashboard({
     fetchAllCourses();
     courses = allCourses;
     fetchEnrollments();
-  } else {
-    fetchAllCourses();
-    courses = allCourses.filter((course) =>
-      enrollments.some(
-        (enrollment) =>
-          enrollment.user === currentUser._id &&
-          enrollment.course === course._id
-      )
-    );
   }
 
   if (enrollments.length == 0) {
