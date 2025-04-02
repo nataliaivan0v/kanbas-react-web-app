@@ -4,7 +4,7 @@ import { FormControl } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import * as enrollmentsClient from "./client";
-import * as coursesClient from "/Users/nataliaivanov/kanbas-react-web-app/src/Kambaz/Courses/client.ts";
+import * as coursesClient from "../Kambaz/Courses/client.ts";
 
 export default function Dashboard({
   courses,
