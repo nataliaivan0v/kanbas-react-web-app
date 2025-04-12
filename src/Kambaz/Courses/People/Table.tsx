@@ -7,8 +7,8 @@ import * as coursesClient from "../client.ts";
 import { useParams } from "react-router-dom";
 import { useEffect, useState} from "react";
 
-export default function PeopleTable() {
-  const [users, setUsers] = useState<any[]>([]);
+export default function PeopleTable({ users }: { users: any[] }) {
+  const [newUsers, setUsers] = useState<any[]>(users);
   const { cid } = useParams();
 
   useEffect(() => {
