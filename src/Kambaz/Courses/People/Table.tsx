@@ -3,8 +3,29 @@ import { Table } from "react-bootstrap";
 import { FaUserCircle } from "react-icons/fa";
 import PeopleDetails from "./Details";
 import { Link } from "react-router-dom";
+import * as coursesClient from "../client.ts";
+import { useParams } from "react-router-dom";
+import { useEffect, useState} from "react";
 
-export default function PeopleTable({ users = [] }: { users?: any[] }) {
+export default function PeopleTable() {
+  const [users, setUsers] = useState<any[]>([]);
+  const { cid } = useParams();
+
+  useEffect(() => {
+    if (cid) {
+      const fetchUsers = async () => {
+        try {
+          const courseUsers = await coursesClient.findUsersForCourse(cid);
+          setUsers(courseUsers);
+        } catch (error) {
+          console.error("Error fetching users:", error);
+        }
+      };
+
+      fetchUsers();
+    }
+  }, [cid]);
+
   return (
     <div id="wd-people-table">
       <PeopleDetails />
