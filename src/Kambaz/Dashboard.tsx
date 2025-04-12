@@ -15,6 +15,9 @@ export default function Dashboard({
   updateCourse,
   enrollInCourse,
   unenrollFromCourse,
+  enrolling,
+  setEnrolling,
+  updateEnrollment,
 }: {
   courses: any[]; // eslint-disable-line @typescript-eslint/no-explicit-any
   course: any; // eslint-disable-line @typescript-eslint/no-explicit-any
@@ -24,6 +27,9 @@ export default function Dashboard({
   updateCourse: (course: any) => void; // eslint-disable-line @typescript-eslint/no-explicit-any
   enrollInCourse: (userId: string, courseId: string) => void;
   unenrollFromCourse: (userId: string, courseId: string) => void;
+  enrolling: boolean;
+  setEnrolling: (enrolling: boolean) => void;
+  updateEnrollment: (courseId: string, enrolled: boolean) => void;
 }) {
   const { currentUser } = useSelector((state: any) => state.accountReducer); // eslint-disable-line @typescript-eslint/no-explicit-any
   const [showAllCourses, setShowAllCourses] = useState(false);
@@ -54,22 +60,29 @@ export default function Dashboard({
     }
   };
 
+  const isEnrolled = (courseId: string) =>
+    enrollments.some(
+      (enrollment) =>
+        enrollment.user === currentUser._id && enrollment.course === courseId
+    );
+
+  const getEnrolledCourses = (courses) => {
+    return courses.filter((course) => isEnrolled(course._id));
+  };
+
   if (showAllCourses) {
     fetchAllCourses();
     courses = allCourses;
     fetchEnrollments();
+  } else {
+    fetchAllCourses();
+    courses = getEnrolledCourses(allCourses);
   }
 
   if (enrollments.length == 0) {
     fetchEnrollments();
     fetchAllCourses();
   }
-
-  const isEnrolled = (courseId: string) =>
-    enrollments.some(
-      (enrollment) =>
-        enrollment.user === currentUser._id && enrollment.course === courseId
-    );
 
   return (
     <div id="wd-dashboard">
@@ -143,6 +156,19 @@ export default function Dashboard({
                   />
                   <Card.Body className="card-body">
                     <Card.Title className="wd-dashboard-course-title text-nowrap overflow-hidden">
+                      {enrolling && (
+                        <button
+                          onClick={(event) => {
+                            event.preventDefault();
+                            updateEnrollment(course._id, !course.enrolled);
+                          }}
+                          className={`btn ${
+                            course.enrolled ? "btn-danger" : "btn-success"
+                          } float-end`}
+                        >
+                          {course.enrolled ? "Unenroll" : "Enroll"}
+                        </button>
+                      )}
                       {course.name}{" "}
                     </Card.Title>
                     <Card.Text
