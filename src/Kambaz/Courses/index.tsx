@@ -6,6 +6,9 @@ import AssignmentEditor from "./Assignments/Editor";
 import { Navigate, Route, Routes, useParams, useLocation } from "react-router";
 import { FaAlignJustify } from "react-icons/fa";
 import PeopleTable from "./People/Table";
+import Quizzes from "./Quizzes";
+import QuizDetails from "./Quizzes/QuizDetails";
+import QuizEditor from "./Quizzes/QuizEditor";
 
 export default function Courses({ courses }: { courses: any[]; }) { // eslint-disable-line @typescript-eslint/no-explicit-any
   const { cid } = useParams();
@@ -28,6 +31,9 @@ export default function Courses({ courses }: { courses: any[]; }) { // eslint-di
               <Route path="Modules" element={<Modules />} />
               <Route path="Assignments" element={<Assignments />} />
               <Route path="Assignments/:aid" element={<AssignmentEditor />} />
+              <Route path="Quizzes" element={<Quizzes />} />
+              <Route path="Quizzes/:qid" element={<QuizDetails />} />
+              <Route path="Quizzes/:qid/Edit" element={<QuizEditor />} />
               <Route path="People" element={<PeopleTable />} />
               </Routes>
           </div>

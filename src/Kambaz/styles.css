@@ -56,3 +56,16 @@ body * {  font-family: Arial, Helvetica, sans-serif;  }
 #wd-account-navigation {
   margin-right: 30px;
 }
+
+#wd-quiz-text {
+  font-size: 16px;
+}
+
+.custom-tabs {
+  width: 100%;
+  border-bottom: 2px solid #dee2e6;
+}
+
+.inactive-tab {
+  color: red !important;
+}
