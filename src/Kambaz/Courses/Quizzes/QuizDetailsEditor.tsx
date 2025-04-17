@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Button } from "react-bootstrap";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router";
