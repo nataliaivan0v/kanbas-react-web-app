@@ -35,7 +35,7 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
 
 // Local draft factory
 const createNewQuestion = (): Question => ({
-    id: uuidv4(),
+    id: "new",
     type: 'multiple_choice',
     title: '',
     points: 0,
@@ -81,6 +81,7 @@ export default function QuizQuestionsEditor() {
     const addQuestion = () => setQuestions(prev => [...prev, createNewQuestion()]);
 
     const saveQuestion = async (id: string) => {
+        console.log(id)
         const q = questions.find(x => x.id === id);
         if (!q || !qid) return;
         const correctIndex = q.choices.findIndex(c => c.isCorrect);
@@ -94,7 +95,9 @@ export default function QuizQuestionsEditor() {
             correct_answer_index: correctIndex,
         };
         try {
-            if (id.includes('-')) {
+            console.log(id)
+
+            if (id=="new") {
                 // create new
                 const created: any = await createQuestionForQuiz(qid, payload);
                 setQuestions(prev => prev.map(x =>
@@ -125,9 +128,10 @@ export default function QuizQuestionsEditor() {
     };
 
     const removeQuestion = async (id: string) => {
-        if (!id.includes('-') && qid) {
+        if (qid) {
             try {
                 await deleteQuizQuestion(qid, id);
+
             } catch (err) {
                 console.error('Delete error', err);
             }
