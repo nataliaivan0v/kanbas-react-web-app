@@ -11,11 +11,6 @@ import {
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'fill_blank';
 
-export interface Choice {
-    id: string;
-    text: string;
-    isCorrect: boolean;
-}
 
 export interface Question {
     id: string;        
@@ -23,7 +18,8 @@ export interface Question {
     title: string;
     points: number;
     questionText: string;
-    choices: Choice[];
+    choices: string[];
+    correct_answer_index: number;
     isEditing: boolean;
 }
 
@@ -40,10 +36,8 @@ const createNewQuestion = (): Question => ({
     title: '',
     points: 0,
     questionText: '',
-    choices: [
-        { id: uuidv4(), text: '', isCorrect: true },
-        { id: uuidv4(), text: '', isCorrect: false },
-    ],
+    correct_answer_index: 0,
+    choices: [],
     isEditing: true,
 });
 
@@ -63,11 +57,8 @@ export default function QuizQuestionsEditor() {
                     title: q.title,
                     points: q.points,
                     questionText: q.text,
-                    choices: (q.choices || []).map((text: string, i: number) => ({
-                        id: uuidv4(),
-                        text,
-                        isCorrect: i === q.correct_answer_index,
-                    })),
+                    correct_answer_index: q.correct_answer_index,
+                    choices: q.choices,
                     isEditing: false,
                 }));
                 setQuestions(loaded);
@@ -94,12 +85,14 @@ export default function QuizQuestionsEditor() {
             choices: q.choices.map(c => c.text),
             correct_answer_index: correctIndex,
         };
+        console.log(payload)
         try {
             console.log(id)
 
             if (id=="new") {
                 // create new
                 const created: any = await createQuestionForQuiz(qid, payload);
+
                 setQuestions(prev => prev.map(x =>
                     x.id === id ? { ...q, id: created._id, isEditing: false } : x
                 ));
@@ -174,12 +167,11 @@ export default function QuizQuestionsEditor() {
                                 value={q.type}
                                 onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                                     const newType = e.target.value as QuestionType;
-                                    let choices: Choice[] = [];
+                                    let choices: string[] = [];
                                     if (newType === 'multiple_choice') choices = q.choices;
                                     else if (newType === 'true_false') {
                                         choices = [
-                                            { id: uuidv4(), text: 'True', isCorrect: true },
-                                            { id: uuidv4(), text: 'False', isCorrect: false },
+                                            "True", "False"
                                         ];
                                     }
                                     updateQuestion(q.id, { type: newType, choices });
@@ -189,6 +181,7 @@ export default function QuizQuestionsEditor() {
                                     <option key={opt.value} value={opt.value}>
                                         {opt.label}
                                     </option>
+                                    
                                 ))}
                             </Form.Select>
                         </Col>
@@ -337,7 +330,7 @@ export default function QuizQuestionsEditor() {
                                         updateQuestion(q.id, {
                                             choices: [
                                                 ...q.choices,
-                                                { id: uuidv4(), text: '', isCorrect: true },
+                                                "",
                                             ],
                                         })
                                     }
@@ -372,12 +365,16 @@ export default function QuizQuestionsEditor() {
                     {QUESTION_TYPES.find(t => t.value === q.type)?.label}
                 </Card.Subtitle>
                 <Card.Text>{q.questionText}</Card.Text>
+                <Card.Subtitle className="mb-2 text-muted">
+                {q.points} Points
+                    </Card.Subtitle>
+
 
                 {q.type === 'multiple_choice' && (
                     <ul>
                         {q.choices.map(c => (
-                            <li key={c.id} style={{ fontWeight: c.isCorrect ? 'bold' : 'normal' }}>
-                                {c.text || '(empty)'}
+                            <li key={c} style={{ fontWeight: c.isCorrect ? 'bold' : 'normal' }}>
+                                {c}
                             </li>
                         ))}
                     </ul>
@@ -385,18 +382,8 @@ export default function QuizQuestionsEditor() {
 
                 {q.type === 'true_false' && (
                     <div>
-                        <Form.Check
-                            type="radio"
-                            label="True"
-                            checked={q.choices.find(x => x.text === 'True')?.isCorrect}
-                            readOnly
-                        />
-                        <Form.Check
-                            type="radio"
-                            label="False"
-                            checked={q.choices.find(x => x.text === 'False')?.isCorrect}
-                            readOnly
-                        />
+                        <li style={{ fontWeight: q.correct_answer_index == 0 ? 'bold' : 'normal' }}>True</li>
+                        <li style={{ fontWeight: q.correct_answer_index == 1 ? 'bold' : 'normal' }}>False</li>
                     </div>
                 )}
 
