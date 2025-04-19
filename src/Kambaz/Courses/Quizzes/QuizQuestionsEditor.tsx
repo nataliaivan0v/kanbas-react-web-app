@@ -197,7 +197,7 @@ export default function QuizQuestionsEditor() {
 
                     <div className="fw-bold mb-2">Answers</div>
 
-                    {q.type === 'multiple_choice' &&
+                    {q.type !== 'true_false' && (
                         q.choices.map((c, index) => (
                             <Row key={index} className="align-items-center mb-2">
                                 <Col xs="auto">
@@ -233,7 +233,9 @@ export default function QuizQuestionsEditor() {
                                     </Button>
                                 </Col>
                             </Row>
-                        ))}
+                        ))
+                        )}
+                        
 
                     {q.type !== 'true_false' && (
                         <div className="text-end">
@@ -314,54 +316,30 @@ export default function QuizQuestionsEditor() {
                 <Card.Subtitle className="mb-2 text-muted">
                     {q.points} Points
                 </Card.Subtitle>
-
-
-
-
-
-                {q.type === 'multiple_choice' && (
-                    <ListGroup className="mb-3">
-                        {q.choices.map((c, i) => {
-                            const isCorrect = i === q.correct_answer_index;
-                            return (
-                                <ListGroup.Item
-                                    key={i}
-                                    className="d-flex align-items-center"
-                                    variant={isCorrect ? 'success' : undefined}
-                                >
-                    
-                                    {isCorrect && (
-                                        <FaLongArrowAltRight className="me-2 text-success" />
-                                    )}
-
-                                    <Badge bg={isCorrect ? 'success' : 'secondary'} pill className="me-3">
-                                        {isCorrect ? 'Correct Answer' : 'Possible Option'}
-                                    </Badge>
-
-                                    <span>{c}</span>
-                                </ListGroup.Item>
-                            );
-                        })}
-                    </ListGroup>
-                )}
-
-
-                {q.type === 'true_false' && (
-                    <ul>
-                        {['True', 'False'].map((label, i) => (
-                            <li
+                <ListGroup className="mb-3">
+                    {q.choices.map((c, i) => {
+                        const isCorrect = (i === q.correct_answer_index) || (q.type == "fill_blank")
+                        return (
+                            <ListGroup.Item
                                 key={i}
-                                style={{
-                                    color:
-                                        i === q.correct_answer_index ? 'green' : 'black',
-                                }}
+                                className="d-flex align-items-center"
+                                variant={isCorrect ? 'success' : undefined}
                             >
-                                {i === q.correct_answer_index && <FaLongArrowAltRight />}
-                                {label}
-                            </li>
-                        ))}
-                    </ul>
-                )}
+
+                                {isCorrect && (
+                                    <FaLongArrowAltRight className="me-2 text-success" />
+                                )}
+
+                                <Badge bg={isCorrect ? 'success' : 'secondary'} pill className="me-3">
+                                    {isCorrect ? 'Correct Answer' : 'Possible Option'}
+                                </Badge>
+
+                                <span>{c}</span>
+                            </ListGroup.Item>
+                        );
+                    })}
+                </ListGroup>
+
 
                 <div className="mt-3 text-end">
                     <Button
