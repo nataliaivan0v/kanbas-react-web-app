@@ -37,6 +37,18 @@ export const updateQuizQuestion = async (
   return data;
 };
 
+export const updateQuizQuestions = async (
+  quizId: string,
+  questions: any
+): Promise<any> => {
+  const { data } = await axiosWithCredentials.put(
+    `${QUIZZES_API}/${quizId}/quizquestions`,
+    questions
+  );
+ 
+  return data;
+};
+
 export const deleteQuizQuestion = async (
   quizId: string,
   questionId: string

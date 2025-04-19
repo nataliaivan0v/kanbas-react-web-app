@@ -1,9 +1,11 @@
 import { useState, useEffect, ChangeEvent } from 'react';
-import { Form, Button, Card, Row, Col, InputGroup } from 'react-bootstrap';
-import { Link, useParams } from 'react-router-dom';
+import { Form, Button, Card, Row, Col, InputGroup, ListGroup, Badge } from 'react-bootstrap';
+import { Link, useParams, useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { FaLongArrowAltRight } from "react-icons/fa";
 import {
     fetchQuestionsForQuiz,
+    updateQuizQuestions,
     createQuestionForQuiz,
     updateQuizQuestion,
     deleteQuizQuestion,
@@ -11,9 +13,8 @@ import {
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'fill_blank';
 
-
 export interface Question {
-    id: string;        
+    id: string;
     type: QuestionType;
     title: string;
     points: number;
@@ -29,9 +30,8 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
     { value: 'fill_blank', label: 'Fill in the Blank' },
 ];
 
-// Local draft factory
 const createNewQuestion = (): Question => ({
-    id: "new",
+    id: 'new-' + uuidv4(),
     type: 'multiple_choice',
     title: '',
     points: 0,
@@ -43,14 +43,15 @@ const createNewQuestion = (): Question => ({
 
 export default function QuizQuestionsEditor() {
     const [questions, setQuestions] = useState<Question[]>([]);
+    const [deletedIds, setDeletedIds] = useState<string[]>([]);
     const { cid, qid } = useParams<{ cid: string; qid: string }>();
+    const navigate = useNavigate();
 
     useEffect(() => {
         if (!qid) return;
         (async () => {
             try {
                 const data: any[] = await fetchQuestionsForQuiz(qid);
-                console.log(data)
                 const loaded: Question[] = data.map(q => ({
                     id: q._id,
                     type: q.type as QuestionType,
@@ -68,90 +69,76 @@ export default function QuizQuestionsEditor() {
         })();
     }, [qid]);
 
+    const addQuestion = () => {
+        setQuestions(prev => [...prev, createNewQuestion()]);
+    };
 
-    const addQuestion = () => setQuestions(prev => [...prev, createNewQuestion()]);
+    const cancelEdit = (id: string) => {
+        setQuestions(prev =>
+            prev.map(q => (q.id === id ? { ...q, isEditing: false } : q))
+        );
+    };
 
-    const saveQuestion = async (id: string) => {
-        console.log(id)
-        const q = questions.find(x => x.id === id);
-        if (!q || !qid) return;
-        const correctIndex = q.choices.findIndex(c => c.isCorrect);
-        const payload = {
-            quiz: qid,
+    const startEdit = (id: string) => {
+        setQuestions(prev =>
+            prev.map(q => (q.id === id ? { ...q, isEditing: true } : q))
+        );
+    };
+
+    const markDelete = (id: string) => {
+        setDeletedIds(prev => [...prev, id]);
+        setQuestions(prev => prev.filter(q => q.id !== id));
+    };
+
+    const updateQuestion = (id: string, updates: Partial<Question>) => {
+        setQuestions(prev =>
+            prev.map(q => (q.id === id ? { ...q, ...updates } : q))
+        );
+    };
+
+    const handleChoiceChange = (qId: string, index: number, value: string) => {
+        const q = questions.find(x => x.id === qId);
+        if (!q) return;
+        const updatedChoices = [...q.choices];
+        updatedChoices[index] = value;
+        updateQuestion(qId, { choices: updatedChoices });
+    };
+
+    // ** NEW: only called when bottom Save button is clicked **
+    const handleSaveAll = async () => {
+        if (!qid) return;
+
+        const questionsPayload = questions.map(q => ({
+            ...(q.id.startsWith('new-') ? {} : { _id: q.id }),
             title: q.title,
             type: q.type,
             points: q.points,
             text: q.questionText,
-            choices: q.choices.map(c => c.text),
-            correct_answer_index: correctIndex,
-        };
-        console.log(payload)
+            choices: q.choices,
+            correct_answer_index: q.correct_answer_index,
+        }));
+
+        const realDeletedIds = deletedIds.filter(id => !id.startsWith('new-'));
+
         try {
-            console.log(id)
+            await updateQuizQuestions(qid, {
+                questions: questionsPayload,
+                deletedIds: realDeletedIds,
+            });
 
-            if (id=="new") {
-                // create new
-                const created: any = await createQuestionForQuiz(qid, payload);
-
-                setQuestions(prev => prev.map(x =>
-                    x.id === id ? { ...q, id: created._id, isEditing: false } : x
-                ));
-            } else {
-                // update existing
-                await updateQuizQuestion(qid, { ...payload, _id: id });
-                setQuestions(prev => prev.map(x =>
-                    x.id === id ? { ...x, isEditing: false } : x
-                ));
-            }
+            // on success, navigate back
+            navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
         } catch (err) {
-            console.error('Save error', err);
+            console.error('Bulk save error', err);
+            // show toast or validation error here if you want
         }
-    };
-
-    const cancelEdit = (id: string) => {
-        const q = questions.find(x => x.id === id);
-        if (!q) return;
-        if (!q.title && !q.questionText && q.choices.every(c => !c.text)) {
-            setQuestions(prev => prev.filter(x => x.id !== id));
-        } else {
-            setQuestions(prev => prev.map(x =>
-                x.id === id ? { ...x, isEditing: false } : x
-            ));
-        }
-    };
-
-    const removeQuestion = async (id: string) => {
-        if (qid) {
-            try {
-                await deleteQuizQuestion(qid, id);
-
-            } catch (err) {
-                console.error('Delete error', err);
-            }
-        }
-        setQuestions(prev => prev.filter(x => x.id !== id));
-    };
-
-    const updateQuestion = (id: string, updates: Partial<Question>) => {
-        setQuestions(prev => prev.map(q =>
-            q.id === id ? { ...q, ...updates } : q
-        ));
-    };
-
-    const handleChoiceChange = (qId: string, cId: string, value: string) => {
-        const q = questions.find(x => x.id === qId);
-        if (!q) return;
-        const updated = q.choices.map(c =>
-            c.id === cId ? { ...c, text: value } : c
-        );
-        updateQuestion(qId, { choices: updated });
     };
 
     const renderEditor = (q: Question) => (
-        <Card className="mb-3" key={q.id} >
+        <Card className="mb-3" key={q.id}>
             <Card.Body>
                 <Form>
-                    <Row className="mb-2 align-items-center" >
+                    <Row className="mb-2 align-items-center">
                         <Col>
                             <Form.Control
                                 type="text"
@@ -168,11 +155,8 @@ export default function QuizQuestionsEditor() {
                                 onChange={(e: ChangeEvent<HTMLSelectElement>) => {
                                     const newType = e.target.value as QuestionType;
                                     let choices: string[] = [];
-                                    if (newType === 'multiple_choice') choices = q.choices;
-                                    else if (newType === 'true_false') {
-                                        choices = [
-                                            "True", "False"
-                                        ];
+                                    if (newType === 'true_false') {
+                                        choices = ['True', 'False'];
                                     }
                                     updateQuestion(q.id, { type: newType, choices });
                                 }}
@@ -181,7 +165,6 @@ export default function QuizQuestionsEditor() {
                                     <option key={opt.value} value={opt.value}>
                                         {opt.label}
                                     </option>
-                                    
                                 ))}
                             </Form.Select>
                         </Col>
@@ -190,7 +173,9 @@ export default function QuizQuestionsEditor() {
                                 <Form.Control
                                     type="number"
                                     value={q.points}
-                                    onChange={e => updateQuestion(q.id, { points: Number(e.target.value) })}
+                                    onChange={e =>
+                                        updateQuestion(q.id, { points: Number(e.target.value) })
+                                    }
                                     style={{ width: '80px' }}
                                 />
                                 <InputGroup.Text>pts</InputGroup.Text>
@@ -211,58 +196,57 @@ export default function QuizQuestionsEditor() {
                     </Form.Group>
 
                     <div className="fw-bold mb-2">Answers</div>
-                    
-                    {q.type === 'multiple_choice' && (
-                        <>
-                            {q.choices.map(c => (
-                                <Row key={c.id} className="align-items-center mb-2">
-                                    <Col xs="auto">
-                                        <Form.Check
-                                            type="radio"
-                                            name={`correct-${q.id}`}
-                                            checked={c.isCorrect}
-                                            onChange={() =>
-                                                updateQuestion(q.id, {
-                                                    choices: q.choices.map(x => ({ ...x, isCorrect: x.id === c.id })),
-                                                })
-                                            }
-                                        />
-                                    </Col>
-                                    <Col>
-                                        <Form.Control
-                                            type="text"
-                                            value={c.text}
-                                            onChange={e => handleChoiceChange(q.id, c.id, e.target.value)}
-                                        />
-                                    </Col>
-                                    <Col xs="auto">
-                                        <Button
-                                            variant="outline-secondary"
-                                            size="sm"
-                                            onClick={() =>
-                                                updateQuestion(q.id, {
-                                                    choices: q.choices.filter(x => x.id !== c.id),
-                                                })
-                                            }
-                                        >
-                                            ✕
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            ))}
-                            <div className="text-end">
-                                <Button
-                                    variant="link"
-                                    className="text-danger text-decoration-none p-0"
-                                    style={{ cursor: 'pointer' }}
-                                    onClick={() =>
-                                        updateQuestion(q.id, { choices: [...q.choices, { id: uuidv4(), text: '', isCorrect: false }] })
-                                    }
-                                >
-                                    + Add Another Answer
-                                </Button>
-                            </div>
-                        </>
+
+                    {q.type === 'multiple_choice' &&
+                        q.choices.map((c, index) => (
+                            <Row key={index} className="align-items-center mb-2">
+                                <Col xs="auto">
+                                    <Form.Check
+                                        type="radio"
+                                        name={`correct-${q.id}`}
+                                        checked={index === q.correct_answer_index}
+                                        onChange={() =>
+                                            updateQuestion(q.id, { correct_answer_index: index })
+                                        }
+                                    />
+                                </Col>
+                                <Col>
+                                    <Form.Control
+                                        type="text"
+                                        value={c}
+                                        onChange={e =>
+                                            handleChoiceChange(q.id, index, e.target.value)
+                                        }
+                                    />
+                                </Col>
+                                <Col xs="auto">
+                                    <Button
+                                        variant="outline-secondary"
+                                        size="sm"
+                                        onClick={() =>
+                                            updateQuestion(q.id, {
+                                                choices: q.choices.filter((_, i) => i !== index),
+                                            })
+                                        }
+                                    >
+                                        ✕
+                                    </Button>
+                                </Col>
+                            </Row>
+                        ))}
+
+                    {q.type !== 'true_false' && (
+                        <div className="text-end">
+                            <Button
+                                variant="link"
+                                className="text-decoration-none p-0"
+                                onClick={() =>
+                                    updateQuestion(q.id, { choices: [...q.choices, ''] })
+                                }
+                            >
+                                + Add Another Answer
+                            </Button>
+                        </div>
                     )}
 
                     {q.type === 'true_false' && (
@@ -272,93 +256,55 @@ export default function QuizQuestionsEditor() {
                                     type="radio"
                                     label="True"
                                     name={`tf-${q.id}`}
-                                    checked={q.choices.find(x => x.text === 'True')?.isCorrect}
+                                    checked={q.correct_answer_index === 0}
                                     onChange={() =>
-                                        updateQuestion(q.id, {
-                                            choices: q.choices.map(x => ({ ...x, isCorrect: x.text === 'True' })),
-                                        })
+                                        updateQuestion(q.id, { correct_answer_index: 0 })
                                     }
                                 />
                                 <Form.Check
                                     type="radio"
                                     label="False"
                                     name={`tf-${q.id}`}
-                                    checked={q.choices.find(x => x.text === 'False')?.isCorrect}
+                                    checked={q.correct_answer_index === 1}
                                     onChange={() =>
-                                        updateQuestion(q.id, {
-                                            choices: q.choices.map(x => ({ ...x, isCorrect: x.text === 'False' })),
-                                        })
+                                        updateQuestion(q.id, { correct_answer_index: 1 })
                                     }
                                 />
                             </Col>
                         </Form.Group>
                     )}
 
-                    {q.type === 'fill_blank' && (
-                        <>
-                            {q.choices.map(c => (
-                                <Row key={c.id} className="align-items-center mb-2">
-                                    <Col>
-                                        <Form.Control
-                                            type="text"
-                                            placeholder="Answer (case‑insensitive)"
-                                            value={c.text}
-                                          
-                                            onChange={e => handleChoiceChange(q.id, c.id, e.target.value)}
-                                        />
-                                    </Col>
-                                    <Col xs="auto">
-                                        <Button
-                                            variant="outline-secondary"
-                                            size="sm"
-                                            onClick={() =>
-                                                updateQuestion(q.id, {
-                                                    choices: q.choices.filter(x => x.id !== c.id),
-                                                })
-                                            }
-                                        >
-                                            ✕
-                                        </Button>
-                                    </Col>
-                                </Row>
-                            ))}
-                            <div className="text-end">
-                                <Button
-                                    variant="link"
-                                    className="p-0"
-                                    onClick={() =>
-                                        updateQuestion(q.id, {
-                                            choices: [
-                                                ...q.choices,
-                                                "",
-                                            ],
-                                        })
-                                    }
-                                >
-                                    + Add Another Answer
-                                </Button>
-                            </div>
-                        </>
-                    )}
-
-
-
                     <div className="text-end mt-3">
-                        <Button variant="secondary" className="me-2" onClick={() => cancelEdit(q.id)}>
+                        <Button
+                            variant="secondary"
+                            className="me-2"
+                            onClick={() => cancelEdit(q.id)}
+                        >
                             Cancel
                         </Button>
-                        <Button variant="primary" onClick={() => saveQuestion(q.id)}>
-                            Save Question
+                        <Button
+                            variant="danger"
+                            className="me-2"
+                            onClick={() => updateQuestion(q.id, { isEditing: false })}
+                        >
+                            Save
                         </Button>
+                        {!q.isEditing && (
+                            <Button
+                                variant="primary"
+                                onClick={() => startEdit(q.id)}
+                            >
+                                Edit
+                            </Button>
+                        )}
                     </div>
                 </Form>
             </Card.Body>
         </Card>
     );
-    
 
     const renderPreview = (q: Question) => (
-        <Card className="mb-3" key={q.id} style={{width:'600px'}}>
+        <Card className="mb-3" key={q.id} style={{ width: '600px' }}>
             <Card.Body>
                 <Card.Title>{q.title || '(No title)'}</Card.Title>
                 <Card.Subtitle className="mb-2 text-muted">
@@ -366,54 +312,100 @@ export default function QuizQuestionsEditor() {
                 </Card.Subtitle>
                 <Card.Text>{q.questionText}</Card.Text>
                 <Card.Subtitle className="mb-2 text-muted">
-                {q.points} Points
-                    </Card.Subtitle>
+                    {q.points} Points
+                </Card.Subtitle>
+
+
+
 
 
                 {q.type === 'multiple_choice' && (
+                    <ListGroup className="mb-3">
+                        {q.choices.map((c, i) => {
+                            const isCorrect = i === q.correct_answer_index;
+                            return (
+                                <ListGroup.Item
+                                    key={i}
+                                    className="d-flex align-items-center"
+                                    variant={isCorrect ? 'success' : undefined}
+                                >
+                    
+                                    {isCorrect && (
+                                        <FaLongArrowAltRight className="me-2 text-success" />
+                                    )}
+
+                                    <Badge bg={isCorrect ? 'success' : 'secondary'} pill className="me-3">
+                                        {isCorrect ? 'Correct Answer' : 'Possible Option'}
+                                    </Badge>
+
+                                    <span>{c}</span>
+                                </ListGroup.Item>
+                            );
+                        })}
+                    </ListGroup>
+                )}
+
+
+                {q.type === 'true_false' && (
                     <ul>
-                        {q.choices.map(c => (
-                            <li key={c} style={{ fontWeight: c.isCorrect ? 'bold' : 'normal' }}>
-                                {c}
+                        {['True', 'False'].map((label, i) => (
+                            <li
+                                key={i}
+                                style={{
+                                    color:
+                                        i === q.correct_answer_index ? 'green' : 'black',
+                                }}
+                            >
+                                {i === q.correct_answer_index && <FaLongArrowAltRight />}
+                                {label}
                             </li>
                         ))}
                     </ul>
                 )}
 
-                {q.type === 'true_false' && (
-                    <div>
-                        <li style={{ fontWeight: q.correct_answer_index == 0 ? 'bold' : 'normal' }}>True</li>
-                        <li style={{ fontWeight: q.correct_answer_index == 1 ? 'bold' : 'normal' }}>False</li>
-                    </div>
-                )}
-
-                <div className="mt-3">
-                    <Button variant="link" size="sm" onClick={() => updateQuestion(q.id, { isEditing: true })}>
+                <div className="mt-3 text-end">
+                    <Button
+                        variant="link"
+                        size="sm"
+                        onClick={() => startEdit(q.id)}
+                    >
                         Edit
                     </Button>
-                    <Button variant="link" size="sm" className="text-danger" onClick={() => removeQuestion(q.id)}>
+                    <Button
+                        variant="link"
+                        size="sm"
+                        className="text-danger"
+                        onClick={() => markDelete(q.id)}
+                    >
                         Delete
                     </Button>
                 </div>
             </Card.Body>
         </Card>
     );
-    
 
     return (
         <div>
             <Button variant="secondary" className="mb-3" onClick={addQuestion}>
                 + New Question
             </Button>
-            {questions.map(q => (q.isEditing ? renderEditor(q) : renderPreview(q)))}
+
+            {questions.map(q =>
+                q.isEditing ? renderEditor(q) : renderPreview(q)
+            )}
+
             <hr />
+
             <div className="px-3 mt-3">
                 <Link to={`/Kambaz/Courses/${cid}/Quizzes/${qid}`}>
-                    <Button variant="secondary" className="me-2">Cancel</Button>
+                    <Button variant="secondary" className="me-2">
+                        Cancel
+                    </Button>
                 </Link>
-                <Link to={`/Kambaz/Courses/${cid}/Quizzes/${qid}`}>
-                    <Button variant="danger">Save</Button>
-                </Link>
+
+                <Button variant="danger" onClick={handleSaveAll}>
+                    Save
+                </Button>
             </div>
         </div>
     );
