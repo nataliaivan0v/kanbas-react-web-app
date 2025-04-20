@@ -6,9 +6,10 @@ import { FaLongArrowAltRight } from "react-icons/fa";
 import {
     fetchQuestionsForQuiz,
     updateQuizQuestions,
-    createQuestionForQuiz,
     updateQuizQuestion,
     deleteQuizQuestion,
+    createQuestionForQuiz
+    
 } from './quizQuestionsClient';
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'fill_blank';
@@ -31,7 +32,7 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
 ];
 
 const createNewQuestion = (): Question => ({
-    id: 'new-' + uuidv4(),
+    id: 'new-'+uuidv4(),
     type: 'multiple_choice',
     title: '',
     points: 0,
@@ -88,7 +89,30 @@ export default function QuizQuestionsEditor() {
     const markDelete = (id: string) => {
         setDeletedIds(prev => [...prev, id]);
         setQuestions(prev => prev.filter(q => q.id !== id));
+        if (qid != undefined) {
+            deleteQuizQuestion(qid, id)
+        }
     };
+    const publishQuestionUpdate = (id: string, updates: Partial<Question>) => {
+        const questionPayload = {
+            id: updates.id,
+            title: updates.title,
+            type: updates.type,
+            points: updates.points,
+            text: updates.questionText,
+            choices: updates.choices,
+            correct_answer_index: updates.correct_answer_index,
+        };
+        if (qid == undefined) {
+            return
+        }
+        if (id.includes("new-")) {
+            createQuestionForQuiz(qid, questionPayload)
+        } else {
+            updateQuizQuestion(qid, questionPayload)
+        }
+        cancelEdit(id)
+    }
 
     const updateQuestion = (id: string, updates: Partial<Question>) => {
         setQuestions(prev =>
@@ -109,7 +133,7 @@ export default function QuizQuestionsEditor() {
         if (!qid) return;
 
         const questionsPayload = questions.map(q => ({
-            ...(q.id.startsWith('new-') ? {} : { _id: q.id }),
+            id: q.id,
             title: q.title,
             type: q.type,
             points: q.points,
@@ -119,18 +143,15 @@ export default function QuizQuestionsEditor() {
         }));
 
         const realDeletedIds = deletedIds.filter(id => !id.startsWith('new-'));
+        
+        questions.map(q => {(
+            cancelEdit(q.id)
+        )})
 
         try {
-            await updateQuizQuestions(qid, {
-                questions: questionsPayload,
-                deletedIds: realDeletedIds,
-            });
-
-            // on success, navigate back
-            navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}`);
+            await updateQuizQuestions(qid, questionsPayload, realDeletedIds)
         } catch (err) {
             console.error('Bulk save error', err);
-            // show toast or validation error here if you want
         }
     };
 
@@ -287,9 +308,9 @@ export default function QuizQuestionsEditor() {
                         <Button
                             variant="danger"
                             className="me-2"
-                            onClick={() => updateQuestion(q.id, { isEditing: false })}
+                            onClick={() => publishQuestionUpdate(q.id, q)}
                         >
-                            Save
+                            {q.id.includes("new-") ? "Save" : "Update Question"}
                         </Button>
                         {!q.isEditing && (
                             <Button
@@ -318,7 +339,7 @@ export default function QuizQuestionsEditor() {
                 </Card.Subtitle>
                 <ListGroup className="mb-3">
                     {q.choices.map((c, i) => {
-                        const isCorrect = (i === q.correct_answer_index) || (q.type == "fill_blank")
+                        const isCorrect = i === q.correct_answer_index || q.type == "fill_blank";
                         return (
                             <ListGroup.Item
                                 key={i}

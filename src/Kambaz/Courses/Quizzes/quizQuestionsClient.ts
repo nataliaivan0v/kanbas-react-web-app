@@ -27,10 +27,10 @@ export const updateQuizQuestion = async (
   quizId: string,
   question: any
 ): Promise<any> => {
-  console.log(quizId)
-  console.log(question._id)
+    console.log(quizId)
+    console.log(question)
   const { data } = await axiosWithCredentials.put(
-    `${QUIZZES_API}/${quizId}/quizquestions/${question._id}`,
+    `${QUIZZES_API}/${quizId}/quizquestions/${question.id}`,
     question
   );
  
@@ -39,11 +39,15 @@ export const updateQuizQuestion = async (
 
 export const updateQuizQuestions = async (
   quizId: string,
-  questions: any
+  questions: any[],
+  deletedQuestionsIds: any[],
 ): Promise<any> => {
-  const { data } = await axiosWithCredentials.put(
+  const { data } = await axiosWithCredentials.post(
     `${QUIZZES_API}/${quizId}/quizquestions`,
-    questions
+    {
+      questions,
+      deletedQuestionsIds
+    }
   );
  
   return data;
