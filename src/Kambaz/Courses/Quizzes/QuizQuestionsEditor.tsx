@@ -9,7 +9,7 @@ import {
     updateQuizQuestion,
     deleteQuizQuestion,
     createQuestionForQuiz
-    
+
 } from './quizQuestionsClient';
 
 export type QuestionType = 'multiple_choice' | 'true_false' | 'fill_blank';
@@ -32,7 +32,7 @@ const QUESTION_TYPES: { value: QuestionType; label: string }[] = [
 ];
 
 const createNewQuestion = (): Question => ({
-    id: 'new-'+uuidv4(),
+    id: 'new-' + uuidv4(),
     type: 'multiple_choice',
     title: '',
     points: 0,
@@ -47,22 +47,24 @@ export default function QuizQuestionsEditor() {
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
     const { cid, qid } = useParams<{ cid: string; qid: string }>();
     const navigate = useNavigate();
-
+    const mapData = (q: Any) => {
+        return {
+            id: q._id,
+            type: q.type as QuestionType,
+            title: q.title,
+            points: q.points,
+            questionText: q.text,
+            correct_answer_index: q.correct_answer_index,
+            choices: q.choices,
+            isEditing: false,
+        }
+    }
     useEffect(() => {
         if (!qid) return;
         (async () => {
             try {
                 const data: any[] = await fetchQuestionsForQuiz(qid);
-                const loaded: Question[] = data.map(q => ({
-                    id: q._id,
-                    type: q.type as QuestionType,
-                    title: q.title,
-                    points: q.points,
-                    questionText: q.text,
-                    correct_answer_index: q.correct_answer_index,
-                    choices: q.choices,
-                    isEditing: false,
-                }));
+                const loaded: Question[] = data.map(q => (mapData(q)));
                 setQuestions(loaded);
             } catch (err) {
                 console.error('Failed to load questions', err);
@@ -93,7 +95,7 @@ export default function QuizQuestionsEditor() {
             deleteQuizQuestion(qid, id)
         }
     };
-    const publishQuestionUpdate = (id: string, updates: Partial<Question>) => {
+    const publishQuestionUpdate = async (id: string, updates: Partial<Question>) => {
         const questionPayload = {
             id: updates.id,
             title: updates.title,
@@ -107,7 +109,9 @@ export default function QuizQuestionsEditor() {
             return
         }
         if (id.includes("new-")) {
-            createQuestionForQuiz(qid, questionPayload)
+            const newQuestions = await createQuestionForQuiz(qid, questionPayload)
+            const loaded = newQuestions.map((q: any) => mapData(q))
+            setQuestions(loaded)
         } else {
             updateQuizQuestion(qid, questionPayload)
         }
@@ -143,13 +147,17 @@ export default function QuizQuestionsEditor() {
         }));
 
         const realDeletedIds = deletedIds.filter(id => !id.startsWith('new-'));
-        
-        questions.map(q => {(
-            cancelEdit(q.id)
-        )})
+
+        questions.map(q => {
+            (
+                cancelEdit(q.id)
+            )
+        })
 
         try {
-            await updateQuizQuestions(qid, questionsPayload, realDeletedIds)
+            const newQuestions = await updateQuizQuestions(qid, questionsPayload, realDeletedIds)
+            const loaded: Question[] = newQuestions.map(q => (mapData(q)));
+            setQuestions(loaded);
         } catch (err) {
             console.error('Bulk save error', err);
         }
@@ -255,8 +263,8 @@ export default function QuizQuestionsEditor() {
                                 </Col>
                             </Row>
                         ))
-                        )}
-                        
+                    )}
+
 
                     {q.type !== 'true_false' && (
                         <div className="text-end">
