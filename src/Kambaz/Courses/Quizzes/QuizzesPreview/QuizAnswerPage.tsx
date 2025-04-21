@@ -4,31 +4,31 @@ import { Container } from "react-bootstrap";
 import * as client from "../client";
 import QuizQuestion from "./QuizQuestion";
 import QuizScoreFooter from "./QuizFooter";
-
+import { fetchQuestionsForQuiz } from "../quizQuestionsClient";
 
 export default function QuizAnswerPage() {
-  const { cid, quizId } = useParams();
+  const { cid, qid } = useParams();
   const { state } = useLocation();
   const [quiz, setQuiz] = useState<any>(null);
   const [questions, setQuestions] = useState<any[]>([]);
   const answers = state?.answers || {};
   const navigate = useNavigate();
-  const correctCount = questions.filter(q =>
-    answers[q._id] === q.choices[q.correct_answer_index]
+  const correctCount = questions.filter(
+    (q) => answers[q._id] === q.choices[q.correct_answer_index]
   ).length;
 
   useEffect(() => {
-    if (!quizId) return;
+    if (!qid) return;
     const fetchData = async () => {
-      const q = await client.fetchQuizById(quizId);
+      const q = await client.fetchQuizById(qid);
       const actualQuiz = Array.isArray(q) ? q[0] : q;
       setQuiz(actualQuiz);
 
-      const qs = await client.getQuizQuestions(quizId);
+      const qs = await fetchQuestionsForQuiz(qid);
       setQuestions(qs);
     };
     fetchData();
-  }, [quizId]);
+  }, [qid]);
 
   return (
     <Container className="mt-4">
@@ -43,16 +43,15 @@ export default function QuizAnswerPage() {
           q={q}
           index={index}
           answers={answers}
-          submitted={true} 
-          handleAnswer={() => {}} 
+          submitted={true}
+          handleAnswer={() => {}}
         />
       ))}
       <QuizScoreFooter
-  score={correctCount}
-  total={questions.length}
-  onNext={() => navigate(`/Kambaz/Courses/${cid}`)}
-/>
+        score={correctCount}
+        total={questions.length}
+        onNext={() => navigate(`/Kambaz/Courses/${cid}`)}
+      />
     </Container>
-    
   );
 }

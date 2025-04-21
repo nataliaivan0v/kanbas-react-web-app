@@ -9,6 +9,8 @@ import PeopleTable from "./People/Table";
 import Quizzes from "./Quizzes";
 import QuizDetails from "./Quizzes/QuizDetails";
 import QuizEditor from "./Quizzes/QuizEditor";
+import QuizPreview from "./Quizzes/QuizzesPreview/QuizPreview";
+import QuizAnswerPage from "./Quizzes/QuizzesPreview/QuizAnswerPage";
 
 export default function Courses({ courses }: { courses: any[]; }) { // eslint-disable-line @typescript-eslint/no-explicit-any
   const { cid } = useParams();
@@ -34,6 +36,8 @@ export default function Courses({ courses }: { courses: any[]; }) { // eslint-di
               <Route path="Quizzes" element={<Quizzes />} />
               <Route path="Quizzes/:qid" element={<QuizDetails />} />
               <Route path="Quizzes/:qid/Edit" element={<QuizEditor />} />
+              <Route path="Quizzes/:qid/Preview" element={<QuizPreview />} />
+              <Route path="Quizzes/:qid/Answers" element={<QuizAnswerPage />} />
               <Route path="People" element={<PeopleTable />} />
               </Routes>
           </div>

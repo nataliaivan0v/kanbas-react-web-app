@@ -28,6 +28,7 @@ export default function QuizDetails() {
   const navigatePreview = () => {
     navigate(`/Kambaz/Courses/${quiz.course}/Quizzes/${quiz._id}/Preview`);
   };
+  
   function addDay(date: Date): Date {
     const newDate = new Date(date);
     newDate.setDate(date.getDate() + 1);
