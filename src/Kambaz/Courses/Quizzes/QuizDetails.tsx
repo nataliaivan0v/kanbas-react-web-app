@@ -25,6 +25,9 @@ export default function QuizDetails() {
     navigate(`/Kambaz/Courses/${quiz.course}/Quizzes/${quiz._id}/Edit`);
   };
 
+  const navigatePreview = () => {
+    navigate(`/Kambaz/Courses/${quiz.course}/Quizzes/${quiz._id}/Preview`);
+  };
   function addDay(date: Date): Date {
     const newDate = new Date(date);
     newDate.setDate(date.getDate() + 1);
@@ -52,10 +55,11 @@ export default function QuizDetails() {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <Button
+      <Button
           id="wd-preview-button"
           variant="secondary"
           style={{ marginRight: "10px" }}
+          onClick={() => navigatePreview()}
         >
           Preview
         </Button>
