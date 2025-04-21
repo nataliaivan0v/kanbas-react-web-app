@@ -134,7 +134,6 @@ export default function QuizDetailsEditor() {
   };
 
   if (!loaded) {
-    console.log(currQuiz);
     return null;
   }
 
