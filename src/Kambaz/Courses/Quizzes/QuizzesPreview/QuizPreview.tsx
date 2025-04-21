@@ -1,49 +1,4 @@
-// import { useState, useEffect } from "react";
-// import { Button, Form, Container, Row, Col, Card, Alert } from "react-bootstrap";
-// import { useParams, useNavigate } from "react-router-dom";
-// import * as client from "./client"; 
-
-// export default function QuizPreview() {
-//   const {cid, quizId } = useParams();
-//   const navigate = useNavigate();
-//   const [quiz, setQuiz] = useState<any>(null);
-//   const [answers, setAnswers] = useState<any>({});
-//   const [submitted, setSubmitted] = useState(false);
-//   const [score, setScore] = useState(0);
-
-//   const [questions, setQuestions] = useState<any[]>([]);
-
-//   useEffect(() => {
-//     if (!quizId) return;
-//     const fetchQuizQuestions = async () => {
-//       const q = await client.getQuizQuestions(quizId);
-//       const actualQuiz = Array.isArray(q) ? q[0] : q;
-//       console.log("Fetched quiz:", actualQuiz);
-//       setQuiz(actualQuiz);
-  
-//       const qs = await client.getQuizQuestions(quizId);
-//       console.log("Fetched questions:", qs);
-//       setQuestions(qs);
-//     };
-//     fetchQuizQuestions();
-    
-//   }, [quizId]);
-  
-
-//   const handleAnswer = (qid: string, choice: string) => {
-//     setAnswers({ ...answers, [qid]: choice });
-//   };
-
-//   const handleSubmit = () => {
-//     let correct = 0;
-//     quiz.questions.forEach((q: any) => {
-//       if (answers[q._id] === q.correctAnswer) correct++;
-//     });
-//     setScore(correct);
-//     setSubmitted(true);
-//   };
-
-  import { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button, Container, Alert } from "react-bootstrap";
 import { useParams, useNavigate } from "react-router-dom";
 import { FaPencilAlt } from "react-icons/fa"; 
@@ -136,21 +91,6 @@ export default function QuizPreview() {
             handleAnswer={handleAnswer}
           />
         ))}
-
-        {/* Submit + Edit Buttons */}
-        {/* {!submitted ? (
-          <div className="d-flex justify-content-between my-4">
-            <Button variant="primary" onClick={handleSubmit}>Submit Quiz</Button>
-            <Button variant="secondary" onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Edit`)}>
-              Edit Quiz
-            </Button>
-          </div>
-        ) : (
-          <Button className="my-4" variant="secondary" onClick={() => navigate(`/Kambaz/Courses/${cid}/Quizzes/${quizId}/Edit`)}>
-            Edit Quiz
-          </Button>
-        )} */}
-        {/* Canvas-style bottom box with Submit button */}
 <div
   className="d-flex justify-content-between align-items-center px-3 py-2 mt-4"
   style={{

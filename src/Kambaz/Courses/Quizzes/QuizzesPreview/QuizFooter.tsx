@@ -1,4 +1,4 @@
-import { Button, Row, Col } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 interface QuizScoreFooterProps {
   score: number;
