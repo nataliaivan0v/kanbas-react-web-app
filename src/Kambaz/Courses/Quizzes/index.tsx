@@ -14,6 +14,7 @@ import { useNavigate } from "react-router-dom";
 import { useParams } from "react-router-dom";
 import { Modal } from "react-bootstrap";
 import { FormControl } from "react-bootstrap";
+import { fetchQuestionsForQuiz } from "./quizQuestionsClient";
 
 export default function Quizzes() {
   const { cid } = useParams();
@@ -100,6 +101,24 @@ export default function Quizzes() {
     newDate.setDate(date.getDate() + 1);
     return newDate;
   }
+
+  useEffect(() => {
+    const enrichQuizzesWithNumQuestions = async () => {
+      const updatedQuizzes = await Promise.all(
+        quizzes.map(async (quiz) => {
+          const questions = await fetchQuestionsForQuiz(quiz._id);
+          const newQuiz = { ...quiz, numQuestions: questions.length };
+          quizzesClient.updateQuiz(newQuiz)
+          return { ...quiz, numQuestions: questions.length };
+        })
+      );
+      setQuizzes(updatedQuizzes);
+    };
+
+    if (quizzes.length > 0) {
+      enrichQuizzesWithNumQuestions();
+    }
+  }, [quizzes.length]);
 
   const blankQuiz: {
     title: string;
