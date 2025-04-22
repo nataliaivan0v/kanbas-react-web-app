@@ -4,6 +4,7 @@ import { useParams } from "react-router";
 import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import * as quizzesClient from "./client";
+import * as quizResultsClient from "./QuizzesPreview/quizResultsClient"
 import { useEffect, useState } from "react";
 
 export default function QuizDetails() {
@@ -11,13 +12,29 @@ export default function QuizDetails() {
   const { cid } = useParams();
   const { qid } = useParams();
   const [quizzes, setQuizzes] = useState<any[]>([]);
+  const [quizResults, setQuizResults] = useState<any>();
   const navigate = useNavigate();
 
   useEffect(() => {
-      if (cid) {
-        quizzesClient.findQuizzesForCourse(cid).then(setQuizzes);
-      }
-    }, [cid]); 
+    if (cid) {
+      quizzesClient.findQuizzesForCourse(cid).then(setQuizzes); 
+    }
+    
+
+  }, [cid]);
+
+  useEffect(() => {
+    if (qid) {
+      quizResultsClient.fetchQuizResults(qid, currentUser._id).then(setQuizResults)
+    }
+  }, [])
+
+  const navigateAnswers =() => {
+    const answers = quizResults.lastAnswers
+    navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Answers`, {
+    state: { answers },
+    });
+  }
 
   const quiz = quizzes.find((quiz) => quiz._id === qid);
 
@@ -25,10 +42,11 @@ export default function QuizDetails() {
     navigate(`/Kambaz/Courses/${quiz.course}/Quizzes/${quiz._id}/Edit`);
   };
 
-  const navigatePreview = () => {
-    navigate(`/Kambaz/Courses/${quiz.course}/Quizzes/${quiz._id}/Preview`);
+  const navigatePreview = (isPreview: boolean = true) => {
+    navigate(`/Kambaz/Courses/${quiz.course}/Quizzes/${quiz._id}/Preview`,
+      { state: { isPreview: isPreview } })
   };
-  
+
   function addDay(date: Date): Date {
     const newDate = new Date(date);
     newDate.setDate(date.getDate() + 1);
@@ -38,17 +56,31 @@ export default function QuizDetails() {
   if (!quiz) {
     return <div></div>;
   }
-
+  const outOfAttempts = quizResults && quizResults.attempts >= quiz.attempts;
+  const anAttempt = quizResults && quizResults.attempts > 0
   if (currentUser.role === "STUDENT") {
     return (
       <div>
-        <h2>
-          <b>{quiz.title}</b>
-        </h2>
-        <br></br>
-        <Button id="wd-start-quiz-button" variant="danger">
-          Start Quiz
-        </Button>
+        <h2>{quiz.title}</h2>
+        {outOfAttempts ? (
+          <h3>No More Attempts Left!</h3>
+        ) : (
+          <Button
+            id="wd-start-quiz-button"
+            variant="danger"
+            onClick={() => navigatePreview(false)}
+          >
+            Start Quiz
+          </Button>
+        )}
+        {(anAttempt) && <Button
+          id="wd-last-attempt-button"
+          variant="primary"
+          onClick={()=>navigateAnswers()}
+        >
+          See Previous Attempt
+        </Button>}
+
       </div>
     );
   }
@@ -56,7 +88,7 @@ export default function QuizDetails() {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-      <Button
+        <Button
           id="wd-preview-button"
           variant="secondary"
           style={{ marginRight: "10px" }}
