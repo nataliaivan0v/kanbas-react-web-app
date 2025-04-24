@@ -64,7 +64,6 @@ export default function QuizPreview() {
     setScore(correct);
     setSubmitted(true);
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Answers`, {
-
       state: { answers },
     });
   };

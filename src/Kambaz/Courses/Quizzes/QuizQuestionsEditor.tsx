@@ -46,8 +46,7 @@ export default function QuizQuestionsEditor() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
     const { cid, qid } = useParams<{ cid: string; qid: string }>();
-    const navigate = useNavigate();
-    const mapData = (q: Any) => {
+    const mapData = (q: any) => {
         return {
             id: q._id,
             type: q.type as QuestionType,
@@ -129,7 +128,12 @@ export default function QuizQuestionsEditor() {
         if (!q) return;
         const updatedChoices = [...q.choices];
         updatedChoices[index] = value;
-        updateQuestion(qId, { choices: updatedChoices });
+        if (q.type == "fill_blank") {
+            updateQuestion(qId, { correct_answer_index: -1, choices: updatedChoices })
+        } else {
+            updateQuestion(qId, { choices: updatedChoices });
+        }
+        
     };
 
     // ** NEW: only called when bottom Save button is clicked **
@@ -156,7 +160,7 @@ export default function QuizQuestionsEditor() {
 
         try {
             const newQuestions = await updateQuizQuestions(qid, questionsPayload, realDeletedIds)
-            const loaded: Question[] = newQuestions.map(q => (mapData(q)));
+            const loaded: Question[] = newQuestions.map((q: any) => (mapData(q)));
             setQuestions(loaded);
         } catch (err) {
             console.error('Bulk save error', err);
@@ -229,16 +233,18 @@ export default function QuizQuestionsEditor() {
                     {q.type !== 'true_false' && (
                         q.choices.map((c, index) => (
                             <Row key={index} className="align-items-center mb-2">
-                                <Col xs="auto">
-                                    <Form.Check
-                                        type="radio"
-                                        name={`correct-${q.id}`}
-                                        checked={index === q.correct_answer_index}
-                                        onChange={() =>
-                                            updateQuestion(q.id, { correct_answer_index: index })
-                                        }
-                                    />
-                                </Col>
+                                {q.type !== "fill_blank" && (
+                                    <Col xs="auto">
+                                        <Form.Check
+                                            type="radio"
+                                            name={`correct-${q.id}`}
+                                            checked={index === q.correct_answer_index}
+                                            onChange={() =>
+                                                updateQuestion(q.id, { correct_answer_index: index })
+                                            }
+                                        />
+                                    </Col>
+                                )}
                                 <Col>
                                     <Form.Control
                                         type="text"

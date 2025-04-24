@@ -17,6 +17,7 @@ export const fetchQuizResults = async (
 };
 
 export const updateQuizResults = async (quizId: String, userId: string, results: any) => {
+    console.log("UPDATING QUIZ RESULTS")
     console.log(results)
     const { data } = await axiosWithCredentials.put(`${QUIZRESULTS_API}/${quizId}/users/${userId}`, results);
     return data

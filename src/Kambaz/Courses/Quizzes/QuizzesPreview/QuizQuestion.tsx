@@ -10,12 +10,18 @@ interface QuizQuestionProps {
 
 export default function QuizQuestion({ q, index, answers, submitted, handleAnswer }: QuizQuestionProps) {
   const userAnswer = answers[q._id];
+  console.log(userAnswer);
   const correctAnswer = q.choices[q.correct_answer_index];
-  const status = !userAnswer
-    ? "unanswered"
-    : userAnswer === correctAnswer
-    ? "correct"
-    : "incorrect";
+  console.log(q.type)
+  const status = !userAnswer 
+    ? "unanswered" 
+    : (q.type !== "fill_blank" 
+        ? (userAnswer === correctAnswer ? "correct" : "incorrect")
+        : (q.choices.includes(userAnswer) ? "correct" : "incorrect")
+      );
+  
+  console.log("status");
+  console.log(status);
 
   return (
     <Card className="mb-3" id={`question-${index}`} style={{ borderRadius: "8px", overflow: "hidden" }}>
@@ -74,8 +80,8 @@ export default function QuizQuestion({ q, index, answers, submitted, handleAnswe
               disabled={submitted}
               value={answers[q._id] || ""}
               onChange={(e) => handleAnswer(q._id, e.target.value)}
-              isInvalid={submitted && userAnswer !== correctAnswer}
-              isValid={submitted && userAnswer === correctAnswer}
+              isInvalid={submitted && !userAnswer.includes(q.choices)}
+              isValid={submitted && userAnswer.includes(q.choices)}
             />
           )}
         </Form>

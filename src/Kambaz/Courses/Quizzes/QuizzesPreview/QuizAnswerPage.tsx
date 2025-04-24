@@ -13,9 +13,18 @@ export default function QuizAnswerPage() {
   const [questions, setQuestions] = useState<any[]>([]);
   const answers = state?.answers || {};
   const navigate = useNavigate();
-  const correctCount = questions.filter(
-    (q) => answers[q._id] === q.choices[q.correct_answer_index]
-  ).length;
+  const score = questions.reduce((total, q) => {
+    if (q.type === "fill_blank") {
+      if (q.choices.includes(answers[q._id])) {
+        return total + q.points;
+      }
+    } else {
+      if (answers[q._id] === q.choices[q.correct_answer_index]) {
+        return total + q.points;
+      }
+    }
+    return total;
+  }, 0);
 
   useEffect(() => {
     if (!qid) return;
@@ -44,12 +53,17 @@ export default function QuizAnswerPage() {
           index={index}
           answers={answers}
           submitted={true}
-          handleAnswer={() => {}}
+          handleAnswer={() => { }}
         />
       ))}
       <QuizScoreFooter
-        score={correctCount}
-        total={questions.length}
+        score={score}
+        maxScore={questions.reduce((total, q) => total + q.points, 0)}
+        questionsRight={questions.filter(q =>
+          (q.type === "fill_blank" && q.choices.includes(answers[q._id])) ||
+          (q.type !== "fill_blank" && answers[q._id] === q.choices[q.correct_answer_index])
+        ).length}
+        numOfQuestions={questions.length}
         onNext={() => navigate(`/Kambaz/Courses/${cid}`)}
       />
     </Container>
