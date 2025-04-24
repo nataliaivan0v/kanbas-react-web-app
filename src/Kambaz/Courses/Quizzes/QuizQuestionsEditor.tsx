@@ -95,6 +95,8 @@ export default function QuizQuestionsEditor() {
         }
     };
     const publishQuestionUpdate = async (id: string, updates: Partial<Question>) => {
+        const hasEmptyChoices = questions.some((q: any) => q.choices.length === 0)
+        if (hasEmptyChoices) { return }
         const questionPayload = {
             id: updates.id,
             title: updates.title,
@@ -139,6 +141,8 @@ export default function QuizQuestionsEditor() {
     // ** NEW: only called when bottom Save button is clicked **
     const handleSaveAll = async () => {
         if (!qid) return;
+        const hasEmptyChoices = questions.some((q: any) => q.choices.length === 0)
+        if (hasEmptyChoices) { return }
 
         const questionsPayload = questions.map(q => ({
             id: q.id,

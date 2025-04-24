@@ -129,7 +129,9 @@ export default function QuizDetailsEditor() {
 
   const handleSavePublish = () => {
     quizzesClient.updateQuiz(updatedQuiz);
-    quizzesClient.publishQuiz(qid);
+    if (qid) {
+      quizzesClient.publishQuiz(qid);
+    }
     fetchQuizzes();
   };
 
