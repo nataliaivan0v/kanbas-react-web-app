@@ -92,7 +92,11 @@ export default function Quizzes() {
   };
 
   const createQuiz = async () => {
-    await quizzesClient.createQuizForCourse(cid as string, blankQuiz);
+    const newQuiz = await quizzesClient.createQuizForCourse(
+      cid as string,
+      blankQuiz
+    );
+    navigate(`/Kambaz/Courses/${cid}/Quizzes/${newQuiz._id}/Edit`);
     fetchQuizzes();
   };
 
@@ -108,7 +112,7 @@ export default function Quizzes() {
         quizzes.map(async (quiz) => {
           const questions = await fetchQuestionsForQuiz(quiz._id);
           const newQuiz = { ...quiz, numQuestions: questions.length };
-          quizzesClient.updateQuiz(newQuiz)
+          quizzesClient.updateQuiz(newQuiz);
           return { ...quiz, numQuestions: questions.length };
         })
       );
@@ -233,8 +237,12 @@ export default function Quizzes() {
                       <span id="wd-quiz-text">
                         {(() => {
                           const now = new Date();
-                          const availableFrom = addDay(new Date(quiz.availableFrom));
-                          const availableUntil = addDay(new Date(quiz.availableUntil));
+                          const availableFrom = addDay(
+                            new Date(quiz.availableFrom)
+                          );
+                          const availableUntil = addDay(
+                            new Date(quiz.availableUntil)
+                          );
                           const dueDate = addDay(new Date(quiz.dueDate));
 
                           if (now < availableFrom) {
