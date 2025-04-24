@@ -13,6 +13,7 @@ import * as courseClient from "./Courses/client";
 import * as enrollmentsClient from "./client";
 import * as userClient from "./Account/client";
 
+
 import { useEffect } from "react";
 
 export default function Kambaz() {
@@ -25,9 +26,13 @@ export default function Kambaz() {
   const [enrolling, setEnrolling] = useState<boolean>(false);
 
   const findCoursesForUser = async () => {
+    // if (!currentUser || !currentUser._id) return;
+    console.log(currentUser._id)
     try {
       const courses = await userClient.findCoursesForUser(currentUser._id);
-      setCourses(courses);
+      console.log(courses)
+
+      setCourses(courses.filter((c: any) => c !== null));
     } catch (error) {
       console.error(error);
     }
@@ -154,3 +159,5 @@ export default function Kambaz() {
     </Session>
   );
 }
+
+

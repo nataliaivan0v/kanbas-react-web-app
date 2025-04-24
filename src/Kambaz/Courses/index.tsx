@@ -14,7 +14,7 @@ import QuizAnswerPage from "./Quizzes/QuizzesPreview/QuizAnswerPage";
 
 export default function Courses({ courses }: { courses: any[]; }) { // eslint-disable-line @typescript-eslint/no-explicit-any
   const { cid } = useParams();
-  const course = courses.find((course) => course._id === cid);
+  const course = courses.find((course) => course && course._id === cid);
   const { pathname } = useLocation();
 
   return (
@@ -26,7 +26,8 @@ export default function Courses({ courses }: { courses: any[]; }) { // eslint-di
       <hr />
       <div className="d-flex">
           <CourseNavigation />
-          <div className="wd-course-content-offset p-3">
+          <div className="w-100 min-vh-100 d-flex justify-content-center align-items-start pt-5">
+    <div className="bg-white  rounded p-4" style={{ width: "100%", maxWidth: "800px" }}>
             <Routes>
               <Route path="/" element={<Navigate to="Home" />} />
               <Route path="Home" element={<Home />} />
@@ -41,7 +42,9 @@ export default function Courses({ courses }: { courses: any[]; }) { // eslint-di
               <Route path="People" element={<PeopleTable />} />
               </Routes>
           </div>
+          </div>
         </div>
     </div>
   );
 }
+

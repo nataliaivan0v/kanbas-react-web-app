@@ -5,7 +5,10 @@ import { Button } from "react-bootstrap";
 import { useNavigate } from "react-router-dom";
 import * as quizzesClient from "./client";
 import * as quizResultsClient from "./QuizzesPreview/quizResultsClient"
+import QuizAttempts from "./Attempts/Attempts"
 import { useEffect, useState } from "react";
+import * as clientAttempts from "./Attempts/client";
+
 
 export default function QuizDetails() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -13,6 +16,7 @@ export default function QuizDetails() {
   const { qid } = useParams();
   const [quizzes, setQuizzes] = useState<any[]>([]);
   const [quizResults, setQuizResults] = useState<any>();
+  const [attemptCount, setAttemptCount] = useState<number>(0);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -29,12 +33,24 @@ export default function QuizDetails() {
     }
   }, [])
 
+  useEffect(() => {
+    if (qid && currentUser?._id) {
+      clientAttempts.getStudentAttempts(qid, currentUser._id)
+        .then((attempts) => setAttemptCount(attempts.length))
+        .catch((err) => {
+          console.error("Error fetching attempts", err);
+          setAttemptCount(0);
+        });
+    }
+  }, [qid, currentUser]);
+
   const navigateAnswers =() => {
     const answers = quizResults.lastAnswers
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Answers`, {
     state: { answers },
     });
   }
+  
 
   const quiz = quizzes.find((quiz) => quiz._id === qid);
 
@@ -56,30 +72,35 @@ export default function QuizDetails() {
   if (!quiz) {
     return <div></div>;
   }
-  const outOfAttempts = quizResults && quizResults.attempts >= quiz.attempts;
-  const anAttempt = quizResults && quizResults.attempts > 0
+  const outOfAttempts = quiz?.attempts && attemptCount >= Number(quiz.attempts);
+  const anAttempt = attemptCount > 0;
+
+
   if (currentUser.role === "STUDENT") {
     return (
       <div>
         <h2>{quiz.title}</h2>
-        {outOfAttempts ? (
-          <h3>No More Attempts Left!</h3>
-        ) : (
-          <Button
-            id="wd-start-quiz-button"
-            variant="danger"
-            onClick={() => navigatePreview(false)}
-          >
-            Start Quiz
-          </Button>
-        )}
-        {(anAttempt) && <Button
-          id="wd-last-attempt-button"
-          variant="primary"
-          onClick={()=>navigateAnswers()}
-        >
-          See Previous Attempt
-        </Button>}
+        <QuizAttempts quizId={qid!} studentId={currentUser._id!} />
+
+        {!outOfAttempts && (
+  <Button
+    id="wd-start-quiz-button"
+    variant="danger"
+    onClick={() => navigatePreview(false)}
+  >
+    Start Quiz
+  </Button>
+)}
+
+{anAttempt && (
+  <Button
+    id="wd-last-attempt-button"
+    variant="primary"
+    onClick={navigateAnswers}
+  >
+    See Previous Attempt
+  </Button>
+)}
 
       </div>
     );
@@ -250,7 +271,7 @@ export default function QuizDetails() {
             <span>{quiz.lock}</span>
           </div>
         </div>
-        <div style={{ marginTop: "32px", width: "50vw" }}>
+        <div style={{ marginTop: "32px", width: "42vw" }}>
           <div
             style={{
               display: "flex",

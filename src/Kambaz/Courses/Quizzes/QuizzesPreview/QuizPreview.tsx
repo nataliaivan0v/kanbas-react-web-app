@@ -5,8 +5,9 @@ import { FaPencilAlt } from "react-icons/fa";
 import * as client from "../client";
 import { fetchQuestionsForQuiz } from "../quizQuestionsClient";
 import QuizQuestion from "./QuizQuestion";
-import { updateQuizResults } from "./quizResultsClient";
 import { useSelector } from "react-redux";
+import { submitQuizAttempt } from "../Attempts/client";
+
 
 export default function QuizPreview() {
   const { currentUser } = useSelector((state: any) => state.accountReducer);
@@ -44,30 +45,55 @@ export default function QuizPreview() {
     setAnswers({ ...answers, [qid]: choice });
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     let correct = 0;
     questions.forEach((q: any) => {
-      if (answers[q._id] === q.correctAnswer) correct++;
+      const correctAnswer = q.choices[q.correct_answer_index];
+      const userAnswer = answers[q._id];
+      if (userAnswer === correctAnswer) correct++;
     });
-    if (!isPreview) {
-      if (qid) {
-        const finalAnswers = Object.fromEntries(
-          questions.map((q: any) => [q._id, answers[q._id]])
-        );
-        const results = {
-          lastAnswers: finalAnswers,
-          lastScore: correct,
-        }
-        updateQuizResults(qid, currentUser._id, results) 
+  
+    if (qid) {
+      const payload = {
+        studentId: currentUser._id,
+        courseId: cid,
+        answers: questions.map((q: any) => ({
+          questionId: q._id,
+          selectedAnswer: answers[q._id],
+          isCorrect: answers[q._id] === q.correctAnswer,
+        })),
+        score: correct,
+        total: questions.length,
+        timeTaken: 0
+      };
+
+      console.log("📤 Submitting attempt:", {
+        quizId: qid,
+        studentId: currentUser._id,
+        answers: questions.map((q: any) => ({
+          questionId: q._id,
+          selectedAnswer: answers[q._id],
+          isCorrect: answers[q._id] === q.correctAnswer,
+        })),
+        score: correct,
+        total: questions.length,
+        timeTaken: 0,
+      });
+  
+      try {
+        await submitQuizAttempt(qid, payload);
+      } catch (error) {
+        console.error(" Failed to save quiz attempt", error);
       }
     }
+  
     setScore(correct);
     setSubmitted(true);
     navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Answers`, {
-
       state: { answers },
     });
   };
+  
 
   const scrollToQuestion = (index: number) => {
     const el = document.getElementById(`question-${index}`);
@@ -77,7 +103,7 @@ export default function QuizPreview() {
 
   return (
     <Container fluid className="d-flex justify-content-center">
-      <div style={{ maxWidth: "800px", width: "100%" }}>
+      <div style={{ width: "100%", height: "100vh", margin: 0, padding: 0 }}>
         {/* Title */}
         <h3 className="fw-bold">{quiz?.title}</h3>
 
@@ -128,21 +154,24 @@ export default function QuizPreview() {
           )}
         </div>
 
-        <div
-          className="d-flex align-items-center mt-3 px-3 py-2"
-          style={{
-            backgroundColor: "#f5f5f5",
-            border: "1px solid #ddd",
-            borderRadius: "3px",
-            cursor: "pointer",
-          }}
-          onClick={() =>
-            navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Edit`)
-          }
-        >
-          <FaPencilAlt className="me-2 d-flex " style={{ color: "#555" }} />
-          <span style={{ fontWeight: 500 }}>Keep Editing This Quiz</span>
-        </div>
+        {currentUser.role === "FACULTY" && (
+          <div
+            className="d-flex align-items-center mt-3 px-3 py-2"
+            style={{
+              backgroundColor: "#f5f5f5",
+              border: "1px solid #ddd",
+              borderRadius: "3px",
+              cursor: "pointer",
+            }}
+            onClick={() =>
+              navigate(`/Kambaz/Courses/${cid}/Quizzes/${qid}/Edit`)
+            }
+          >
+            <FaPencilAlt className="me-2 d-flex" style={{ color: "#555" }} />
+            <span style={{ fontWeight: 500 }}>Keep Editing This Quiz</span>
+          </div>
+        )}
+
 
         <hr />
         <div className="mt-4 mb-5">

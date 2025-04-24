@@ -46,7 +46,6 @@ export default function QuizQuestionsEditor() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [deletedIds, setDeletedIds] = useState<string[]>([]);
     const { cid, qid } = useParams<{ cid: string; qid: string }>();
-    const navigate = useNavigate();
     const mapData = (q: Any) => {
         return {
             id: q._id,

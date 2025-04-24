@@ -4,7 +4,7 @@ import { Row, Col, Card, Button } from "react-bootstrap";
 import { FormControl } from "react-bootstrap";
 import { useSelector } from "react-redux";
 
-export default function Dashboard({
+export default function ({
   courses,
   course,
   setCourse,
