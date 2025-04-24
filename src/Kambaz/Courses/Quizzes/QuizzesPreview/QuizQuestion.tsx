@@ -11,6 +11,7 @@ interface QuizQuestionProps {
 export default function QuizQuestion({ q, index, answers, submitted, handleAnswer }: QuizQuestionProps) {
   const userAnswer = answers[q._id];
   console.log(userAnswer);
+  console.log(q.choices)
   const correctAnswer = q.choices[q.correct_answer_index];
   console.log(q.type)
   const status = !userAnswer 
@@ -80,8 +81,8 @@ export default function QuizQuestion({ q, index, answers, submitted, handleAnswe
               disabled={submitted}
               value={answers[q._id] || ""}
               onChange={(e) => handleAnswer(q._id, e.target.value)}
-              isInvalid={submitted && !userAnswer.includes(q.choices)}
-              isValid={submitted && userAnswer.includes(q.choices)}
+              isInvalid={submitted && !(status == "correct")}
+              isValid={submitted && status == "correct"}
             />
           )}
         </Form>
@@ -104,7 +105,7 @@ export default function QuizQuestion({ q, index, answers, submitted, handleAnswe
             )}
             {status === "incorrect" && (
               <p>
-                <strong>Correct answer:</strong>{" "}
+                <strong>Correct answer:</strong>{q.choices[0]}
                 <span style={{ fontWeight: "bold" }}>{correctAnswer}</span>
               </p>
             )}
