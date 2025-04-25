@@ -111,9 +111,24 @@ export default function Quizzes() {
       const updatedQuizzes = await Promise.all(
         quizzes.map(async (quiz) => {
           const questions = await fetchQuestionsForQuiz(quiz._id);
-          const newQuiz = { ...quiz, numQuestions: questions.length };
-          quizzesClient.updateQuiz(newQuiz);
-          return { ...quiz, numQuestions: questions.length };
+          const now = new Date();
+          const availableFrom = new Date(quiz.availableFrom);
+          const availableUntil = new Date(quiz.availableUntil);
+  
+          const isOutsideAvailability =
+            now < availableFrom || now > availableUntil;
+  
+          const updatedQuiz = {
+            ...quiz,
+            numQuestions: questions.length,
+          };
+  
+          if (quiz.published === "Published" && isOutsideAvailability) {
+            updatedQuiz.published = "Unpublished";
+          }
+  
+          await quizzesClient.updateQuiz(updatedQuiz);
+          return updatedQuiz;
         })
       );
       setQuizzes(updatedQuizzes);
